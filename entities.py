@@ -13,46 +13,60 @@ class Entity(object):
 
 class Chest(Entity):
     count_of_items = 0
+    items = []
 
-    def __init__(self, id, level):
+    def __init__(self, id, level, x, y):
         super().__init__(id, level)
-        self.count_of_items = 10 - self.level
-
-    def createChest(self, x, y):
+        self.count_of_items = random.randint(1, 4)
         self.location = [x, y]
-        tempChest = {'id': self.id, 'location': self.location}
-        items = []
-        for i in range(1, self.count_of_items):
+        self.createChest()
+
+    def createChest(self):
+        i = 1
+        while i < self.count_of_items:
             createArmor = random.randint(0, 1)
             createWeapon = random.randint(0, 1)
             createPostion = random.randint(0, 1)
+            if createArmor == 0 and createPostion == 0 and createWeapon == 0:
+                continue
 
             if createArmor == 1:
                 if self.level < 4:
-                    items.append({'armor': random.randint(1, 2)})
+                    self.items.append({'armor': random.randint(1, 2)})
                 elif self.level in range(4, 6):
-                    items.append({'armor': random.randint(2, 4)})
+                    self.items.append({'armor': random.randint(2, 4)})
                 elif self.level > 6:
-                    items.append({'armor': random.randint(3, 5)})
+                    self.items.append({'armor': random.randint(3, 5)})
 
             if createWeapon == 1:
                 if self.level < 4:
-                    items.append({'weapon': random.randint(1, 2)})
+                    self.items.append({'weapon': random.randint(1, 2)})
                 elif self.level in range(3, 7):
-                    items.append({'weapon': random.randint(2, 4)})
+                    self.items.append({'weapon': random.randint(2, 4)})
                 elif self.level > 6:
-                    items.append({'weapon': random.randint(3, 5)})
+                    self.items.append({'weapon': random.randint(3, 5)})
 
             if createPostion == 1:
-                items.append({'postion': True})
-        return tempChest
+                self.items.append({'postion': True})
+            i += 1
 
 
 class Mob(Entity):
     hp = 0
     power = 0
 
-    def __init__(self, id, level, hp, power):
+    def __init__(self, id, level, x, y):
         super().__init__(id, level)
-        self.hp = hp
-        self.power = power
+        self.hp = random.randint(self.level, self.level + 2)
+        self.power = random.randint(self.level, self.level + 1)
+        self.location = [x, y]
+
+
+class Player(Entity):
+    armor = 0
+    hp = 6
+    power = 1
+
+    def __init__(self, id, level, location):
+        super().__init__(id, level)
+        self.location = location

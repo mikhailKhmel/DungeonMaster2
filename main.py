@@ -2,18 +2,21 @@ import pygame
 import genmaps
 import random
 import math
+import entities
+import render
 
 
 class Game(object):
     level = 1
     sector = genmaps.Map()
+    player = entities.Player(id=0, level=1, location=sector.setPlayer())
 
     def __init__(self, level):
         self.level = level
         self.__FPS = 10
         self.__STEP = 64
         self.__WINDOW_HEIGHT = 1024
-        self.__WINDOW_WEIGHT = 800
+        self.__WINDOW_WEIGHT = 1024
 
     @property
     def getFps(self):
@@ -28,7 +31,7 @@ class Game(object):
         return self.__WINDOW_HEIGHT, self.__WINDOW_WEIGHT
 
     def renderView(self):
-        pass
+        render.renderGame(sc, self.sector.maps)
 
     def restartLevel(self):
         countofrooms = random.randint(5, 10)
@@ -36,7 +39,7 @@ class Game(object):
         countofchests = random.randint(2, countofrooms - math.floor(countofrooms / 2))
         self.sector.setChests(countofchests, self.level)
         self.sector.setLadder()
-        countofmobs = random.randint(5, countofrooms - math.floor(countofrooms / 2) + 10)
+        countofmobs = random.randint(5, 5 + self.level)
         self.sector.setMobs(countofmobs, self.level)
 
     def increaseLevel(self):
@@ -52,10 +55,10 @@ class Game(object):
 game = Game(1)
 
 pygame.init()
-pygame.display.set_mode(game.getWindow)
+sc = pygame.display.set_mode(game.getWindow)
 clock = pygame.time.Clock()
 ###########
-game.restartLevel()
+
 game.renderView()
 
 ###########
@@ -63,7 +66,7 @@ pygame.display.update()
 while True:
     clock.tick(game.getFps)
     pygame.display.update()
-
+    game.renderView()
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
             exit()
