@@ -32,6 +32,8 @@ class Game(object):
 
     def renderView(self):
         render.renderGame(sc, self.sector.maps)
+        # render.lightZone(sc)
+        # sc.blit(lightZone, (0, 0))
 
     def restartLevel(self):
         countofrooms = random.randint(5, 10)
@@ -56,6 +58,8 @@ game = Game(1)
 
 pygame.init()
 sc = pygame.display.set_mode(game.getWindow)
+lightZone = pygame.display.set_mode(game.getWindow)
+sc.blit(lightZone, (0, 0))
 clock = pygame.time.Clock()
 ###########
 
@@ -67,6 +71,7 @@ while True:
     clock.tick(game.getFps)
     pygame.display.update()
     game.renderView()
+
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
             exit()
