@@ -4,7 +4,7 @@ import entities
 
 
 class Map(object):
-    length = 64
+    length = 50
     maps = []
     center = []
     chests = []
@@ -59,9 +59,15 @@ class Map(object):
             x = locate[0] + random.randint(-2, 2)
             y = locate[1] + random.randint(-2, 2)
             if self.maps[x][y] == '0':
-                self.chests.append(entities.Chest(i, level, x, y))
-                self.maps[x][y] = '5'
-                i += 1
+                if self.maps[x - 1][y] == '5' or self.maps[x][y - 1] == '5' or self.maps[x + 1][y] == '5' or \
+                        self.maps[x][y + 1] == '5':
+                    continue
+                else:
+                    self.chests.append(entities.Chest(i, level, x, y))
+                    self.maps[x][y] = '5'
+                    i += 1
+            else:
+                continue
         print(self.chests)
 
     def setLadder(self):

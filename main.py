@@ -15,8 +15,8 @@ class Game(object):
         self.level = level
         self.__FPS = 15
         self.__STEP = 64
-        self.__WINDOW_HEIGHT = 1024
-        self.__WINDOW_WEIGHT = 1024
+        self.__WINDOW_HEIGHT = 800
+        self.__WINDOW_WEIGHT = 800
 
     @property
     def getFps(self):
@@ -107,21 +107,28 @@ while True:
     clock.tick(game.getFps)
     pygame.display.update()
     game.renderView(god_mode)
-    game.moveMobs()
+    move_key = False
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
             exit()
         elif i.type == pygame.KEYDOWN:
+
             if i.key == pygame.K_UP:
                 game.movePlayer(-1, 0)
+                move_key=True
             elif i.key == pygame.K_DOWN:
                 game.movePlayer(1, 0)
+                move_key = True
             elif i.key == pygame.K_LEFT:
                 game.movePlayer(0, -1)
+                move_key = True
             elif i.key == pygame.K_RIGHT:
                 game.movePlayer(0, 1)
+                move_key = True
             elif i.key == pygame.K_p:
                 if not god_mode:
                     god_mode = True
                 else:
                     god_mode = False
+            if move_key:
+                game.moveMobs()
