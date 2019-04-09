@@ -12,16 +12,16 @@ class Map(object):
 
     def __init__(self):
         self.maps = [['1' for i in range(0, self.length)] for j in range(0, self.length)]
-        countofrooms = random.randint(5, 20)
+        countofrooms = random.randint(3, 8)
         self.generateroom(countofrooms, True)
-        countofchests = random.randint(len(self.center) // 2, len(self.center))
+        countofchests = random.randint(1, 4)
         self.setChests(countofchests, 1)
         self.setLadder()
         countofmobs = random.randint(len(self.center) // 2, len(self.center))
         self.setMobs(countofmobs, 1)
 
     def cleanUp(self):
-        self.maps = []
+        self.maps = [['1' for i in range(0, self.length)] for j in range(0, self.length)]
         self.center = []
         self.chests = []
         self.mobs = []
@@ -88,25 +88,104 @@ class Map(object):
                 self.maps[x][y] = '3'
                 i += 1
 
+    def moveCurrentMob(self, mob, player):
+        cur_i = mob.location[0]
+        cur_j = mob.location[1]
+        find_player = False
+        for i in range(cur_i - 3, cur_i + 3):
+            for j in range(cur_j - 3, cur_j + 3):
+                if self.maps[i][j] == '2':
+                    find_player = True
+        if not find_player:
+            if self.maps[cur_i - 1][cur_j] == '0' or self.maps[cur_i + 1][cur_j] == '0' or self.maps[cur_i][
+                cur_j - 1] == '0' or self.maps[cur_i][cur_j + 1] == '0':
+                while True:
+                    di = random.randint(-1, 1)
+                    dj = random.randint(-1, 1)
+                    if di != 0 and dj != 0:
+                        continue
+                    else:
+                        if self.maps[cur_i + di][cur_j + dj] in ['1', '2', '3', '4', '5']:
+                            continue
+                        else:
+                            break
+                self.maps[cur_i][cur_j] = '0'
+                mob.location[0] += di
+                mob.location[1] += dj
+                self.maps[cur_i + di][cur_j + dj] = '3'
+        else:
+            if self.maps[cur_i + 1][cur_j] == '2' or self.maps[cur_i][cur_j + 1] == '2' or self.maps[cur_i - 1][
+                cur_j] == '2' or self.maps[cur_i][cur_j - 1] == '2':
+                player.hp -= mob.power
+            else:
+                diffI = player.location[0] - cur_i
+                diffJ = player.location[1] - cur_j
+                di = []
+                dj = []
+                if diffI < 0 and diffJ < 0:  # в зависимости от разницы составляются "векторы" направления моба
+                    di = [-2, -1]
+                    dj = [-2, -1]
+                elif diffI > 0 and diffJ < 0:
+                    di = [2, 1]
+                    dj = [-2, -1]
+                elif diffI < 0 and diffJ > 0:
+                    di = [-2, -1]
+                    dj = [2, 1]
+                elif diffI > 0 and diffJ > 0:
+                    di = [2, 1]
+                    dj = [2, 1]
+                elif diffI == 0 and diffJ <= 0:
+                    di = [0, 0]
+                    dj = [-2, -1]
+                elif diffI == 0 and diffJ >= 0:
+                    di = [0, 0]
+                    dj = [2, 1]
+                elif diffI <= 0 and diffJ == 0:
+                    di = [-2, -1]
+                    dj = [0, 0]
+                elif diffI >= 0 and diffJ == 0:
+                    di = [2, 1]
+                    dj = [0, 0]
+                else:
+                    pass
+
+                flag = False
+                newI = 0
+                newJ = 0
+                for i in di:
+                    for j in dj:
+                        if self.maps[cur_i + i][cur_j + j] == '0':
+                            flag = True
+                            newI = i
+                            newJ = j
+                            break
+                    if flag:
+                        break
+                if flag:
+                    mob.location[0] = cur_i + newI
+                    mob.location[1] = cur_j + newJ
+                    self.maps[cur_i][cur_j] = '0'
+                    self.maps[cur_i + newI][cur_j + newJ] = '3'
+
+    def moveMobs(self, player):
+        for mob in self.mobs:
+            self.moveCurrentMob(mob, player)
+
     def setPlayer(self):
         while True:
             x = random.randint(0, self.length - 1)
             y = random.randint(0, self.length - 1)
             if self.maps[x][y] == '0':
                 self.maps[x][y] = '2'
-                entities.Player.location = [x, y]
-                print(entities.Player.location)
                 return [x, y]
 
-    def movePlayer(self, dx, dy):
-        future_place = self.maps[entities.Player.location[0] + dx][entities.Player.location[1] + dy]
-        if future_place == '1':
-            return False
-        elif future_place == '4':
-            return True
+    def movePlayer(self, dx, dy, player):
+        future_place = self.maps[player.location[0] + dx][player.location[1] + dy]
+        if future_place in ['1', '3', '5']:
+            return player.location
         else:
-            self.maps[entities.Player.location[0]][entities.Player.location[1]] = '0'
-            entities.Player.location[0] += dx
-            entities.Player.location[1] += dy
-            self.maps[entities.Player.location[0]][entities.Player.location[1]] = '2'
-            return False
+            self.maps[player.location[0]][player.location[1]] = '0'
+            player.location[0] += dx
+            player.location[1] += dy
+            self.maps[player.location[0]][player.location[1]] = '2'
+            return player.location

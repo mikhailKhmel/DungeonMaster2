@@ -6,6 +6,7 @@ import entities
 import render
 import time
 
+
 class Game(object):
     level = 1
     sector = genmaps.Map()
@@ -49,44 +50,38 @@ class Game(object):
         self.level += 1
         self.sector.cleanUp()
 
-    # def viewAllInfo(self):
-    #     print(self.sector.mobs)
-    #     print(self.player)
-    #     # for i in self.sector.maps:
-    #     #     print(i)
-    #     # print(self.sector.center)
-
     def movePlayer(self, dx, dy):
-        if self.sector.movePlayer(dx, dy):
+        self.player.location = self.sector.movePlayer(dx, dy, self.player)
+        if self.sector.maps[self.player.location[0]][self.player.location[1]] == '4':
             self.increaseLevel()
             self.restartLevel()
-
-    def moveCurrentMob(self, mob, i, j):
-        if self.sector.maps[i - 1][j] == '0' or self.sector.maps[i + 1][j] == '0' or self.sector.maps[i][
-            j - 1] == '0' or self.sector.maps[i][j + 1] == '0':
-            while True:
-                di = random.randint(-1, 1)
-                dj = random.randint(-1, 1)
-                if di != 0 and dj != 0:
-                    continue
-                else:
-                    if self.sector.maps[i + di][j + dj] == '1':
-                        continue
-                    else:
-                        break
-            self.sector.maps[i][j] = '0'
-            mob.location[0] += di
-            mob.location[1] += dj
-            self.sector.maps[i + di][j + dj] = '3'
+        else:
+            return
 
     def moveMobs(self):
-        for i in range(0, len(self.sector.maps)):
-            for j in range(0, len(self.sector.maps[i])):
+        self.sector.moveMobs(self.player)
 
-                if self.sector.maps[i][j] == '3':
-                    for mob in self.sector.mobs:
-                        if mob.location == [i, j]:
-                            self.moveCurrentMob(mob, i, j)
+    def __searchMob(self, di, dj):
+        for mob in self.sector.mobs:
+            if mob.location == [self.player.location[0] + di, self.player.location[1] + dj]:
+                mob.hp -= self.player.power
+                if mob.hp <= 0:
+                    self.sector.mobs.remove(mob)
+                    self.sector.maps[self.player.location[0] + di][self.player.location[1] + dj] = '0'
+                return True
+        return False
+
+    def playerAttackMob(self):
+        current_locationI = self.player.location[0]
+        current_locationJ = self.player.location[1]
+        if self.sector.maps[current_locationI + 1][current_locationJ] == '3':
+            self.__searchMob(1, 0)
+        elif self.sector.maps[current_locationI][current_locationJ + 1] == '3':
+            self.__searchMob(0, 1)
+        elif self.sector.maps[current_locationI - 1][current_locationJ] == '3':
+            self.__searchMob(-1, 0)
+        elif self.sector.maps[current_locationI][current_locationJ - 1] == '3':
+            self.__searchMob(0, -1)
 
 
 god_mode = True
@@ -108,6 +103,8 @@ while True:
     pygame.display.update()
     game.renderView(god_mode)
     move_key = False
+    # if game.player.hp<=0:
+    #     break
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
             exit()
@@ -115,7 +112,7 @@ while True:
 
             if i.key == pygame.K_UP:
                 game.movePlayer(-1, 0)
-                move_key=True
+                move_key = True
             elif i.key == pygame.K_DOWN:
                 game.movePlayer(1, 0)
                 move_key = True
@@ -124,6 +121,9 @@ while True:
                 move_key = True
             elif i.key == pygame.K_RIGHT:
                 game.movePlayer(0, 1)
+                move_key = True
+            elif i.key == pygame.K_SPACE:
+                game.playerAttackMob()
                 move_key = True
             elif i.key == pygame.K_p:
                 if not god_mode:
