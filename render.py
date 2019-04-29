@@ -20,6 +20,7 @@ DARK_GROUND = 'src/env/dark/plitka1.bmp'
 
 PLAYER = 'src/player/player00.bmp'
 MOB = 'src/env/light/mob.bmp'
+RED = 'src/env/light/redMob.bmp'
 LADDER = 'src/env/light/ladder.bmp'
 CHEST = 'src/env/light/chest.bmp'
 
@@ -160,3 +161,12 @@ def renderGame(sc, sector, god_mode):
             x += STEP
         x = 0
         y += STEP
+
+
+def attackMob(sc, location):
+    x = location[1] * STEP
+    y = location[0] * STEP
+    img = pygame.image.load(RED)
+    img_rect = img.get_rect(topleft=(x, y))
+    sc.blit(img, img_rect)
+    return

@@ -52,19 +52,20 @@ class Game(object):
 
     def movePlayer(self, dx, dy):
         self.player.location = self.sector.movePlayer(dx, dy, self.player)
-        if self.sector.maps[self.player.location[0]][self.player.location[1]] == '4':
+        if self.player.location == [0, 0]:
             self.increaseLevel()
             self.restartLevel()
         else:
             return
 
     def moveMobs(self):
-        self.sector.moveMobs(self.player)
+        self.sector.moveMobs(self.player, sc)
 
     def __searchMob(self, di, dj):
         for mob in self.sector.mobs:
             if mob.location == [self.player.location[0] + di, self.player.location[1] + dj]:
                 mob.hp -= self.player.power
+                render.attackMob(sc, mob.location)
                 if mob.hp <= 0:
                     self.sector.mobs.remove(mob)
                     self.sector.maps[self.player.location[0] + di][self.player.location[1] + dj] = '0'

@@ -1,6 +1,7 @@
 import random
 import math
 import entities
+import render
 
 
 class Map(object):
@@ -88,7 +89,7 @@ class Map(object):
                 self.maps[x][y] = '3'
                 i += 1
 
-    def moveCurrentMob(self, mob, player):
+    def moveCurrentMob(self, mob, player, sc):
         cur_i = mob.location[0]
         cur_j = mob.location[1]
         find_player = False
@@ -117,6 +118,7 @@ class Map(object):
             if self.maps[cur_i + 1][cur_j] == '2' or self.maps[cur_i][cur_j + 1] == '2' or self.maps[cur_i - 1][
                 cur_j] == '2' or self.maps[cur_i][cur_j - 1] == '2':
                 player.hp -= mob.power
+                render.attackMob(sc, player.location)
             else:
                 diffI = player.location[0] - cur_i
                 diffJ = player.location[1] - cur_j
@@ -167,9 +169,9 @@ class Map(object):
                     self.maps[cur_i][cur_j] = '0'
                     self.maps[cur_i + newI][cur_j + newJ] = '3'
 
-    def moveMobs(self, player):
+    def moveMobs(self, player, sc):
         for mob in self.mobs:
-            self.moveCurrentMob(mob, player)
+            self.moveCurrentMob(mob, player, sc)
 
     def setPlayer(self):
         while True:
@@ -183,6 +185,8 @@ class Map(object):
         future_place = self.maps[player.location[0] + dx][player.location[1] + dy]
         if future_place in ['1', '3', '5']:
             return player.location
+        elif future_place == '4':
+            return [0, 0]
         else:
             self.maps[player.location[0]][player.location[1]] = '0'
             player.location[0] += dx
