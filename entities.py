@@ -65,6 +65,7 @@ class Player(Entity):
     armor = 0
     hp = 6
     power = 1
+    inventory = []
 
     def __init__(self, id, level, location):
         super().__init__(id, level)

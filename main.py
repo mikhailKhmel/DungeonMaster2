@@ -17,7 +17,7 @@ class Game(object):
         self.level = level
         self.__FPS = 15
         self.__STEP = 64
-        self.__WINDOW_HEIGHT = 800
+        self.__WINDOW_HEIGHT = 1200
         self.__WINDOW_WEIGHT = 800
 
     @property
@@ -86,7 +86,7 @@ class Game(object):
             self.__searchMob(0, -1)
 
 
-god_mode = True
+god_mode = False
 game = Game(1)
 
 pygame.init()
