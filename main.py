@@ -16,8 +16,8 @@ class Game(object):
     def __init__(self, level):
         self.level = level
         self.__FPS = 15
-        self.__STEP = 64
-        self.__WINDOW_HEIGHT = 1200
+        self.__STEP = 16
+        self.__WINDOW_HEIGHT = 960
         self.__WINDOW_WEIGHT = 800
 
     @property
@@ -33,7 +33,7 @@ class Game(object):
         return self.__WINDOW_HEIGHT, self.__WINDOW_WEIGHT
 
     def renderView(self, god_mode):
-        render.renderGame(sc, self.sector.maps, god_mode)
+        render.renderGame(sc, self.sector.maps, god_mode, self.player)
         # render.lightZone(sc)
         # sc.blit(lightZone, (0, 0))
 

@@ -5,8 +5,14 @@ STEP = 16
 WINDOW_HEIGHT = 1024
 WINDOW_WEIGHT = 1024
 
-ARMOR_LOCATION = (62, 55)
-WEAPON_LOCATION = (62, 168)
+ARMOR_LOCATION = (96, 32)
+WEAPON_LOCATION = (32, 32)
+
+BAG = ((32, 96), (64, 96), (96, 96),
+       (32, 128), (64, 128), (96, 128))
+
+HEALTH = ((32, 224), (64, 224), (96, 224))
+ARMOR = ((32, 288), (64, 288), (96, 288))
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -27,9 +33,11 @@ RED = 'src/env/light/redMob.bmp'
 LADDER = 'src/env/light/ladder.bmp'
 CHEST = 'src/env/light/chest.bmp'
 
-INV_BACK = 'src/inv/invbg.bmp'
+INV_BACK = 'src/inv/new_inv.png'
 ARMOR_LVL1 = 'src/inv/invarmour1.bmp'
-WEAPON_LVL1 = 'src/inv/invspear.bmp'
+ARMOR_LVL2 = 'src/inv/invarmour2.bmp'
+WEAPON_LVL1 = 'src/inv/invweapon1.bmp'
+WEAPON_LVL2 = 'src/inv/invweapon2.bmp'
 
 
 def blitImg(sc, tpe, dx, dy):
@@ -144,21 +152,18 @@ def renderLightZone(sc, sector, x, y, i, j):
         y += STEP
 
 
-def renderInv(sc):
-    inv_sc = pygame.Surface((400, 800))
+def renderInv(sc, player):
+    inv_sc = pygame.Surface((160, 383))
 
     img = pygame.image.load(INV_BACK)
     img_rect = img.get_rect(topleft=(0, 0))
     inv_sc.blit(img, img_rect)
 
-    img = pygame.image.load(WEAPON_LVL1)
-    img_rect = img.get_rect(topleft=WEAPON_LOCATION)
-    inv_sc.blit(img, img_rect)
 
     sc.blit(inv_sc, (800, 0))
 
 
-def renderGame(sc, sector, god_mode):
+def renderGame(sc, sector, god_mode, player):
     if god_mode:
         x = 0
         y = 0
@@ -183,8 +188,7 @@ def renderGame(sc, sector, god_mode):
         x = 0
         y += STEP
 
-    renderInv(sc)
-
+    renderInv(sc, player)
 
 
 def attackMob(sc, location):

@@ -63,8 +63,10 @@ class Mob(Entity):
 
 class Player(Entity):
     armor = 0
+    armor_lvl = 1
+    weapon_lvl = 1
     hp = 6
-    power = 1
+    power = 0
     inventory = []
 
     def __init__(self, id, level, location):
