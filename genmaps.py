@@ -5,7 +5,7 @@ import render
 
 
 class Map(object):
-    length = 50
+    length = 25
     maps = []
     center = []
     chests = []

@@ -1,7 +1,7 @@
 import pygame
 from entities import Player
 
-STEP = 16
+STEP = 32
 WINDOW_HEIGHT = 1024
 WINDOW_WEIGHT = 1024
 
@@ -22,13 +22,13 @@ GREEN = (0, 200, 64)
 YELLOW = (225, 225, 0)
 PINK = (230, 50, 230)
 
-LIGHT_WALL = 'src/env/light/wall.bmp'
-LIGHT_GROUND = 'src/env/light/plitka1.bmp'
+LIGHT_WALL = 'src/env/light/new_wall.bmp'
+LIGHT_GROUND = 'src/env/light/new_plitka.bmp'
 DARK_WALL = 'src/env/dark/wall.bmp'
 DARK_GROUND = 'src/env/dark/plitka1.bmp'
 
 PLAYER = 'src/player/player00.bmp'
-MOB = 'src/env/light/mob.bmp'
+MOB = 'src/env/light/mob1.bmp'
 RED = 'src/env/light/redMob.bmp'
 LADDER = 'src/env/light/ladder.bmp'
 CHEST = 'src/env/light/chest.bmp'
@@ -36,8 +36,17 @@ CHEST = 'src/env/light/chest.bmp'
 INV_BACK = 'src/inv/new_inv.png'
 ARMOR_LVL1 = 'src/inv/invarmour1.bmp'
 ARMOR_LVL2 = 'src/inv/invarmour2.bmp'
+ARMOR_LVL3 = 'src/inv/invarmour3.bmp'
+ARMOR_LVL4 = 'src/inv/invarmour4.bmp'
+ARMOR_LVL5 = 'src/inv/invarmour5.bmp'
+
 WEAPON_LVL1 = 'src/inv/invweapon1.bmp'
 WEAPON_LVL2 = 'src/inv/invweapon2.bmp'
+WEAPON_LVL3 = 'src/inv/invweapon3.bmp'
+WEAPON_LVL4 = 'src/inv/invweapon4.bmp'
+WEAPON_LVL5 = 'src/inv/invweapon5.bmp'
+
+POTION = 'src/inv/invpotion.bmp'
 
 
 def blitImg(sc, tpe, dx, dy):
@@ -153,15 +162,35 @@ def renderLightZone(sc, sector, x, y, i, j):
 
 
 def renderInv(sc, player):
-    inv_sc = pygame.Surface((160, 383))
+    inv_sc = pygame.Surface((160,105))
 
     img = pygame.image.load(INV_BACK)
     img_rect = img.get_rect(topleft=(0, 0))
     inv_sc.blit(img, img_rect)
 
+    
+    sc.blit(inv_sc, (800, 32*5))
 
-    sc.blit(inv_sc, (800, 0))
+def renderInfoAboutPlayer(sc,player):
+    info_sc = pygame.Surface((160, 800))
+    info_sc.fill((5, 67, 187))
 
+    f = pygame.font.SysFont('CourerNew', 32)
+
+    text_hp = f.render("HP:  "+str(bin(player.hp))[1:], 0, (250, 162, 2))
+    info_sc.blit(text_hp, (0,0))
+
+    text_power = f.render("POWER:  "+str(bin(player.power))[1:], 0, (250, 162, 2))
+    info_sc.blit(text_power, (0,32))
+
+    text_armor = f.render("ARMOR:  "+str(bin(player.armor))[1:], 0, (250, 162, 2))
+    info_sc.blit(text_armor, (0,64))
+
+    text_inv = f.render("INVENTORY: ",0,(250, 162, 2))
+    info_sc.blit(text_inv, (0,32*4))
+
+    sc.blit(info_sc, (800,0))
+    return
 
 def renderGame(sc, sector, god_mode, player):
     if god_mode:
@@ -187,7 +216,7 @@ def renderGame(sc, sector, god_mode, player):
             x += STEP
         x = 0
         y += STEP
-
+    renderInfoAboutPlayer(sc,player)
     renderInv(sc, player)
 
 

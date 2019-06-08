@@ -8,6 +8,7 @@ import time
 
 version = 'alpha 0.0.1'
 
+
 class Game(object):
     level = 1
     sector = genmaps.Map()
@@ -40,7 +41,8 @@ class Game(object):
     def restartLevel(self):
         countofrooms = random.randint(5, 10)
         self.sector.generateroom(countofrooms, True)
-        countofchests = random.randint(2, countofrooms - math.floor(countofrooms / 2))
+        countofchests = random.randint(
+            2, countofrooms - math.floor(countofrooms / 2))
         self.sector.setChests(countofchests, self.level)
         self.sector.setLadder()
         countofmobs = random.randint(5, 5 + self.level)
@@ -63,13 +65,16 @@ class Game(object):
         self.sector.moveMobs(self.player, sc)
 
     def __searchMob(self, di, dj):
-        for mob in self.sector.mobs:
-            if mob.location == [self.player.location[0] + di, self.player.location[1] + dj]:
-                mob.hp -= self.player.power
-                render.attackMob(sc, mob.location)
-                if mob.hp <= 0:
-                    self.sector.mobs.remove(mob)
-                    self.sector.maps[self.player.location[0] + di][self.player.location[1] + dj] = '0'
+        tmp = self.sector.mobs
+        for i in range(0, len(tmp)):
+            if tmp[i].location == [self.player.location[0] + di, self.player.location[1] + dj]:
+                tmp[i].hp = tmp[i].hp - self.player.power
+                render.attackMob(sc, tmp[i].location)
+                if tmp[i].hp <= 0:
+                    tmp.remove(tmp[i])
+                    self.sector.maps[self.player.location[0] +
+                                     di][self.player.location[1] + dj] = '0'
+                self.sector.mobs = tmp
                 return True
         return False
 
