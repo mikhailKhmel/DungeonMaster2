@@ -6,7 +6,7 @@ import entities
 import render
 import time
 
-version = 'alpha 0.0.1'
+version = 'alpha 0.0.2'
 
 
 class Game(object):
