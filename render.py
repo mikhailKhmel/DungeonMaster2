@@ -1,5 +1,5 @@
 import pygame
-from entities import Player
+
 
 STEP = 32
 WINDOW_HEIGHT = 1024

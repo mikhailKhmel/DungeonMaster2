@@ -10,10 +10,9 @@ class Map(object):
     center = []
     chests = []
     mobs = []
-
     def __init__(self):
         self.maps = [['1' for i in range(0, self.length)] for j in range(0, self.length)]
-        countofrooms = random.randint(3, 8)
+        countofrooms = random.randint(5, 8)
         self.generateroom(countofrooms, True)
         countofchests = random.randint(1, 4)
         self.setChests(countofchests, 1)
@@ -38,8 +37,8 @@ class Map(object):
 
     def generateroom(self, countofrooms, tunnels):
         for n in range(0, countofrooms):
-            w = random.randint(4, 10)
-            h = random.randint(4, 10)
+            w = random.randint(4, 6)
+            h = random.randint(4, 6)
             x1 = random.randint(1, self.length - w - 1)
             x2 = x1 + w
             y1 = random.randint(1, self.length - h - 1)
@@ -95,6 +94,8 @@ class Map(object):
         find_player = False
         for i in range(cur_i - 3, cur_i + 3):
             for j in range(cur_j - 3, cur_j + 3):
+                if i>=len(self.maps) or i<0 or j>=len(self.maps) or j<0:
+                    continue
                 if self.maps[i][j] == '2':
                     find_player = True
         if not find_player:

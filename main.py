@@ -38,16 +38,28 @@ class Game(object):
         # render.lightZone(sc)
         # sc.blit(lightZone, (0, 0))
 
+    def initPlayer(self):
+        self.player.hp = 6
+        self.player.armor = 0
+        self.player.armor_lvl=0
+        self.player.weapon_lvl=0
+        self.player.power=1
+        self.player.inventory=[]
+        self.player.location=self.sector.setPlayer()
+
     def restartLevel(self):
-        countofrooms = random.randint(5, 10)
-        self.sector.generateroom(countofrooms, True)
-        countofchests = random.randint(
-            2, countofrooms - math.floor(countofrooms / 2))
-        self.sector.setChests(countofchests, self.level)
-        self.sector.setLadder()
-        countofmobs = random.randint(5, 5 + self.level)
-        self.sector.setMobs(countofmobs, self.level)
-        self.player.location = self.sector.setPlayer()
+        sc.fill((0,0,0))
+        self.sector.cleanUp()
+        self.sector.__init__()
+        # countofrooms = random.randint(5, 10)
+        # self.sector.generateroom(countofrooms, True)
+        # countofchests = random.randint(
+        #     2, countofrooms - math.floor(countofrooms / 2))
+        # self.sector.setChests(countofchests, self.level)
+        # self.sector.setLadder()
+        # countofmobs = random.randint(5, 5 + self.level)
+        # self.sector.setMobs(countofmobs, self.level)
+        self.initPlayer()
 
     def increaseLevel(self):
         self.level += 1
@@ -90,6 +102,55 @@ class Game(object):
         elif self.sector.maps[current_locationI][current_locationJ - 1] == '3':
             self.__searchMob(0, -1)
 
+    def renderMenu(self, sc, pos, InProccess):
+        #sc.fill((0, 0, 0))
+        f = pygame.font.SysFont('CourerNew', 32)
+        if InProccess:
+            menu = ['Return', 'Restart', 'Exit']
+        else:
+            menu = ['Start', 'Exit']
+        y = 0
+        for i in range(0, len(menu)):
+            if i == pos:
+                t = f.render(menu[i], 0, (255, 255, 0))
+            else:
+                t = f.render(menu[i], 0, (255, 255, 255))
+            sc.blit(t, (0, y))
+            y += 32
+        return menu
+
+    def menu(self, InProccess, sc):
+        menu = True
+        pos = 0
+        while menu:
+            pygame.display.update()
+            clock.tick(game.getFps)
+
+            list_menu = game.renderMenu(sc, pos, InProccess)
+            length_menu=len(list_menu)
+            for e in pygame.event.get():
+                if e.type == pygame.QUIT:
+                    exit()
+                if e.type == pygame.KEYDOWN:
+                    if e.key == pygame.K_DOWN:
+                        if pos+1 > length_menu-1:
+                            pass
+                        else:
+                            pos += 1
+                    elif e.key == pygame.K_UP:
+                        if pos-1 < 0:
+                            pass
+                        else:
+                            pos -= 1
+                    elif e.key == pygame.K_RETURN:
+                        if list_menu[pos] == 'Start' or list_menu[pos] == 'Return':
+                            menu = False
+                        elif list_menu[pos] == 'Restart':
+                            self.restartLevel()
+                            menu = False
+                        elif list_menu[pos] == 'Exit':
+                            quit()
+
 
 god_mode = False
 game = Game(1)
@@ -101,6 +162,8 @@ sc.blit(lightZone, (0, 0))
 clock = pygame.time.Clock()
 ###########
 
+game.menu(False,sc)
+
 game.renderView(god_mode)
 
 ###########
@@ -110,8 +173,15 @@ while True:
     pygame.display.update()
     game.renderView(god_mode)
     move_key = False
-    # if game.player.hp<=0:
-    #     break
+    if game.player.hp <= 0:
+        sc.fill((255, 0, 0))
+        f = pygame.font.SysFont('CourerNew', 72)
+        gameover_text = f.render("GAME OVER", 0, (0, 0, 0))
+        sc.blit(gameover_text, (100, 100))
+        pygame.display.update()
+        time.sleep(2)
+        game.restartLevel()
+        game.menu(False,sc)
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
             exit()
@@ -137,5 +207,7 @@ while True:
                     god_mode = True
                 else:
                     god_mode = False
+            elif i.key==pygame.K_ESCAPE:
+                game.menu(True,sc)
             if move_key:
                 game.moveMobs()
