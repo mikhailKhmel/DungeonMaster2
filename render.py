@@ -34,19 +34,20 @@ LADDER = 'src/env/light/ladder.bmp'
 CHEST = 'src/env/light/chest.bmp'
 
 INV_BACK = 'src/inv/new_inv.png'
-ARMOR_LVL1 = 'src/inv/invarmour1.bmp'
-ARMOR_LVL2 = 'src/inv/invarmour2.bmp'
-ARMOR_LVL3 = 'src/inv/invarmour3.bmp'
-ARMOR_LVL4 = 'src/inv/invarmour4.bmp'
-ARMOR_LVL5 = 'src/inv/invarmour5.bmp'
+EMPTY_SLOT = 'src/inv/slot.png'
+# ARMOR_LVL1 = 'src/inv/invarmour1.bmp'
+# ARMOR_LVL2 = 'src/inv/invarmour2.bmp'
+# ARMOR_LVL3 = 'src/inv/invarmour3.bmp'
+# ARMOR_LVL4 = 'src/inv/invarmour4.bmp'
+# ARMOR_LVL5 = 'src/inv/invarmour5.bmp'
 
-WEAPON_LVL1 = 'src/inv/invweapon1.bmp'
-WEAPON_LVL2 = 'src/inv/invweapon2.bmp'
-WEAPON_LVL3 = 'src/inv/invweapon3.bmp'
-WEAPON_LVL4 = 'src/inv/invweapon4.bmp'
-WEAPON_LVL5 = 'src/inv/invweapon5.bmp'
+# WEAPON_LVL1 = 'src/inv/invweapon1.bmp'
+# WEAPON_LVL2 = 'src/inv/invweapon2.bmp'
+# WEAPON_LVL3 = 'src/inv/invweapon3.bmp'
+# WEAPON_LVL4 = 'src/inv/invweapon4.bmp'
+# WEAPON_LVL5 = 'src/inv/invweapon5.bmp'
 
-POTION = 'src/inv/invpotion.bmp'
+POTION = 'src/inv/potion.png'
 
 
 def blitImg(sc, tpe, dx, dy):
@@ -163,10 +164,24 @@ def renderLightZone(sc, sector, x, y, i, j):
 
 def renderInv(sc, player):
     inv_sc = pygame.Surface((160,105))
-
-    img = pygame.image.load(INV_BACK)
-    img_rect = img.get_rect(topleft=(0, 0))
-    inv_sc.blit(img, img_rect)
+    x=0
+    y=0
+    c=0
+    for item in player.inventory:
+        if item == '':
+            img = pygame.image.load(EMPTY_SLOT)
+            img_rect = img.get_rect(topleft=(x, y))
+            inv_sc.blit(img, img_rect)
+            x+=54
+        elif item == 'potion':
+            img = pygame.image.load(POTION)
+            img_rect = img.get_rect(topleft=(x, y))
+            inv_sc.blit(img, img_rect)
+            x+=54
+        if c==2:
+            x=0
+            y+=53
+        c+=1
 
     
     sc.blit(inv_sc, (800, 32*5))

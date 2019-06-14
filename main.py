@@ -104,7 +104,7 @@ class Game(object):
 
     def renderMenu(self, sc, pos, InProccess):
         #sc.fill((0, 0, 0))
-        f = pygame.font.Font('src/Minecraftia.ttf', 72)
+        f = pygame.font.Font('src/Minecraftia.ttf', 48)
         if InProccess:
             menu = ['return', 'restart', 'exit']
         else:
@@ -144,7 +144,7 @@ class Game(object):
                             pos -= 1
                     elif e.key == pygame.K_ESCAPE:
                         if list_menu[0] != 'start':
-                            menu = False
+                            quit()
                     elif e.key == pygame.K_RETURN:
                         if list_menu[pos] == 'start' or list_menu[pos] == 'return':
                             menu = False

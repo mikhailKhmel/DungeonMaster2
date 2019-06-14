@@ -67,7 +67,8 @@ class Player(Entity):
     weapon_lvl = 0
     hp = 6
     power = 1
-    inventory = []
+    inventory = ['','','',
+                'potion','','']
 
     def __init__(self, id, level, location):
         super().__init__(id, level)
