@@ -104,11 +104,11 @@ class Game(object):
 
     def renderMenu(self, sc, pos, InProccess):
         #sc.fill((0, 0, 0))
-        f = pygame.font.SysFont('CourerNew', 32)
+        f = pygame.font.Font('src/Minecraftia.ttf', 72)
         if InProccess:
-            menu = ['Return', 'Restart', 'Exit']
+            menu = ['return', 'restart', 'exit']
         else:
-            menu = ['Start', 'Exit']
+            menu = ['start', 'exit']
         y = 0
         for i in range(0, len(menu)):
             if i == pos:
@@ -116,7 +116,7 @@ class Game(object):
             else:
                 t = f.render(menu[i], 0, (255, 255, 255))
             sc.blit(t, (0, y))
-            y += 32
+            y += 72
         return menu
 
     def menu(self, InProccess, sc):
@@ -142,13 +142,16 @@ class Game(object):
                             pass
                         else:
                             pos -= 1
-                    elif e.key == pygame.K_RETURN:
-                        if list_menu[pos] == 'Start' or list_menu[pos] == 'Return':
+                    elif e.key == pygame.K_ESCAPE:
+                        if list_menu[0] != 'start':
                             menu = False
-                        elif list_menu[pos] == 'Restart':
+                    elif e.key == pygame.K_RETURN:
+                        if list_menu[pos] == 'start' or list_menu[pos] == 'return':
+                            menu = False
+                        elif list_menu[pos] == 'eestart':
                             self.restartLevel()
                             menu = False
-                        elif list_menu[pos] == 'Exit':
+                        elif list_menu[pos] == 'exit':
                             quit()
 
 

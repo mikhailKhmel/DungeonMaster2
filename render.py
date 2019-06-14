@@ -175,7 +175,7 @@ def renderInfoAboutPlayer(sc,player):
     info_sc = pygame.Surface((160, 800))
     info_sc.fill((5, 67, 187))
 
-    f = pygame.font.SysFont('CourerNew', 32)
+    f = pygame.font.Font('src/Minecraftia.ttf', 16)
 
     text_hp = f.render("HP:  "+str(bin(player.hp))[1:], 0, (250, 162, 2))
     info_sc.blit(text_hp, (0,0))
