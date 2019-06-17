@@ -35,6 +35,7 @@ CHEST = 'src/env/light/chest.bmp'
 
 INV_BACK = 'src/inv/new_inv.png'
 EMPTY_SLOT = 'src/inv/slot.png'
+SELECTOR = 'src/inv/selector.png'
 # ARMOR_LVL1 = 'src/inv/invarmour1.bmp'
 # ARMOR_LVL2 = 'src/inv/invarmour2.bmp'
 # ARMOR_LVL3 = 'src/inv/invarmour3.bmp'
@@ -161,9 +162,7 @@ def renderLightZone(sc, sector, x, y, i, j):
         x = startX
         y += STEP
 
-
-def renderInv(sc, player):
-    inv_sc = pygame.Surface((160,105))
+def renderOnlyInv(inv_sc,player):
     x=0
     y=0
     c=0
@@ -182,6 +181,25 @@ def renderInv(sc, player):
             x=0
             y+=53
         c+=1
+
+def renderInv(sc, player,mode,pos):
+    inv_sc = pygame.Surface((160,105))
+    
+    if mode:
+        surfSelect = pygame.Surface((54,53))
+        surfSelect.set_alpha(200)
+        x=54*pos
+        if pos in [0,1,2]:
+            y=0
+        else:
+            y=53
+        img = pygame.image.load(SELECTOR)
+        img_rect = img.get_rect(topleft=(0,0))
+        surfSelect.blit(img, img_rect)
+        inv_sc.blit(surfSelect,(x,y))
+        renderOnlyInv(inv_sc,player)
+    else:
+        renderOnlyInv(inv_sc,player)
 
     
     sc.blit(inv_sc, (800, 32*5))
@@ -232,7 +250,7 @@ def renderGame(sc, sector, god_mode, player):
         x = 0
         y += STEP
     renderInfoAboutPlayer(sc,player)
-    renderInv(sc, player)
+    renderInv(sc, player, False, -1)
 
 
 def attackMob(sc, location):

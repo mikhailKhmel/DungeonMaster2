@@ -44,22 +44,18 @@ class Game(object):
         self.player.armor_lvl=0
         self.player.weapon_lvl=0
         self.player.power=1
-        self.player.inventory=[]
+        self.player.inventory=['','','','','','']
         self.player.location=self.sector.setPlayer()
 
-    def restartLevel(self):
+    def restartLevel(self, new_player):
         sc.fill((0,0,0))
         self.sector.cleanUp()
         self.sector.__init__()
-        # countofrooms = random.randint(5, 10)
-        # self.sector.generateroom(countofrooms, True)
-        # countofchests = random.randint(
-        #     2, countofrooms - math.floor(countofrooms / 2))
-        # self.sector.setChests(countofchests, self.level)
-        # self.sector.setLadder()
-        # countofmobs = random.randint(5, 5 + self.level)
-        # self.sector.setMobs(countofmobs, self.level)
-        self.initPlayer()
+        if new_player:
+            self.initPlayer()
+        else:
+            self.player.location=self.sector.setPlayer()
+
 
     def increaseLevel(self):
         self.level += 1
@@ -69,7 +65,7 @@ class Game(object):
         self.player.location = self.sector.movePlayer(dx, dy, self.player)
         if self.player.location == [0, 0]:
             self.increaseLevel()
-            self.restartLevel()
+            self.restartLevel(False)
         else:
             return
 
@@ -109,7 +105,7 @@ class Game(object):
             menu = ['return', 'restart', 'exit']
         else:
             menu = ['start', 'exit']
-        y = 0
+        y = 72
         for i in range(0, len(menu)):
             if i == pos:
                 t = f.render(menu[i], 0, (255, 255, 0))
@@ -118,6 +114,25 @@ class Game(object):
             sc.blit(t, (0, y))
             y += 72
         return menu
+
+    def inv_mode(self):
+        mode = True
+        pos=0
+        while mode:
+            pygame.display.update()
+            clock.tick(self.getFps)
+            #здесь должно быть наложение селектора на предмет
+            render.renderInv(sc,self.player,mode,pos)
+            for e in pygame.event.get():
+                if e.type==pygame.KEYDOWN:
+                    if e.key==pygame.K_LEFT:
+                        if pos!=0:
+                            pos-=1
+                    elif e.key==pygame.K_RIGHT:
+                        if pos!=5:
+                            pos+=1
+                    elif e.key==pygame.K_e:
+                        mode=False
 
     def menu(self, InProccess, sc):
         menu = True
@@ -143,13 +158,13 @@ class Game(object):
                         else:
                             pos -= 1
                     elif e.key == pygame.K_ESCAPE:
-                        if list_menu[0] != 'start':
+                        if list_menu[0] == 'start':
                             quit()
                     elif e.key == pygame.K_RETURN:
                         if list_menu[pos] == 'start' or list_menu[pos] == 'return':
                             menu = False
-                        elif list_menu[pos] == 'eestart':
-                            self.restartLevel()
+                        elif list_menu[pos] == 'restart':
+                            self.restartLevel(True)
                             menu = False
                         elif list_menu[pos] == 'exit':
                             quit()
@@ -183,7 +198,7 @@ while True:
         sc.blit(gameover_text, (100, 100))
         pygame.display.update()
         time.sleep(2)
-        game.restartLevel()
+        game.restartLevel(True)
         game.menu(False,sc)
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
@@ -212,5 +227,7 @@ while True:
                     god_mode = False
             elif i.key==pygame.K_ESCAPE:
                 game.menu(True,sc)
+            elif i.key==pygame.K_e:
+                game.inv_mode()
             if move_key:
                 game.moveMobs()
