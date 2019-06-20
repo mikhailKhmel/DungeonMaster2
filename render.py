@@ -42,11 +42,11 @@ SELECTOR = 'src/inv/selector.png'
 # ARMOR_LVL4 = 'src/inv/invarmour4.bmp'
 # ARMOR_LVL5 = 'src/inv/invarmour5.bmp'
 
-# WEAPON_LVL1 = 'src/inv/invweapon1.bmp'
-# WEAPON_LVL2 = 'src/inv/invweapon2.bmp'
-# WEAPON_LVL3 = 'src/inv/invweapon3.bmp'
-# WEAPON_LVL4 = 'src/inv/invweapon4.bmp'
-# WEAPON_LVL5 = 'src/inv/invweapon5.bmp'
+DISK_LVL1 = 'src/inv/disk_lvl1.png'
+DISK_LVL2 = 'src/inv/disk_lvl2.png'
+DISK_LVL3 = 'src/inv/disk_lvl3.png'
+DISK_LVL4 = 'src/inv/disk_lvl4.png'
+DISK_LVL5 = 'src/inv/disk_lvl5.png'
 
 POTION = 'src/inv/potion.png'
 
@@ -196,7 +196,7 @@ def renderInv(sc, player,mode,pos):
         else:
             y=53
             x=54*(pos-3)
-            
+
         img = pygame.image.load(SELECTOR)
         img_rect = img.get_rect(topleft=(0,0))
         surfSelect.blit(img, img_rect)
@@ -206,7 +206,7 @@ def renderInv(sc, player,mode,pos):
         renderOnlyInv(inv_sc,player)
 
     
-    sc.blit(inv_sc, (800, 32*5))
+    sc.blit(inv_sc, (800, 32*7))
 
 def renderInfoAboutPlayer(sc,player):
     info_sc = pygame.Surface((160, 800))
@@ -220,11 +220,52 @@ def renderInfoAboutPlayer(sc,player):
     text_power = f.render("POWER:  "+str(bin(player.power))[1:], 0, (250, 162, 2))
     info_sc.blit(text_power, (0,32))
 
-    text_armor = f.render("ARMOR:  "+str(bin(player.armor))[1:], 0, (250, 162, 2))
+    text_armor = f.render("ARMOR:  "+str(bin(player.armor_lvl))[1:], 0, (250, 162, 2))
     info_sc.blit(text_armor, (0,64))
 
+    
+    if player.weapon_lvl == 0:
+        img = pygame.image.load(EMPTY_SLOT)
+        info_sc.blit(img,(16,32*4))
+    elif player.weapon_lvl == 1:
+        img = pygame.image.load(DISK_LVL1)
+        info_sc.blit(img,(16,32*4))
+    elif player.weapon_lvl == 2:
+        img = pygame.image.load(DISK_LVL2)
+        info_sc.blit(img,(16,32*4))
+    elif player.weapon_lvl == 3:
+        img = pygame.image.load(DISK_LVL3)
+        info_sc.blit(img,(16,32*4))
+    elif player.weapon_lvl == 4:
+        img = pygame.image.load(DISK_LVL4)
+        info_sc.blit(img,(16,32*4))
+    elif player.weapon_lvl == 5:
+        img = pygame.image.load(DISK_LVL5)
+        info_sc.blit(img,(16,32*4))
+
+    if player.armor_lvl == 0:
+        img = pygame.image.load(EMPTY_SLOT)
+        info_sc.blit(img,(16,32*4))
+    elif player.armor_lvl == 1:
+        img = pygame.image.load(DISK_LVL1)
+        info_sc.blit(img,(16,32*4))
+    elif player.armor_lvl == 2:
+        img = pygame.image.load(DISK_LVL2)
+        info_sc.blit(img,(16,32*4))
+    elif player.armor_lvl == 3:
+        img = pygame.image.load(DISK_LVL3)
+        info_sc.blit(img,(16,32*4))
+    elif player.armor_lvl == 4:
+        img = pygame.image.load(DISK_LVL4)
+        info_sc.blit(img,(16,32*4))
+    elif player.armor_lvl == 5:
+        img = pygame.image.load(DISK_LVL5)
+        info_sc.blit(img,(16,32*4))
+    
+
+
     text_inv = f.render("INVENTORY: ",0,(250, 162, 2))
-    info_sc.blit(text_inv, (0,32*4))
+    info_sc.blit(text_inv, (0,32*6))
 
     sc.blit(info_sc, (800,0))
     return

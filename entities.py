@@ -62,9 +62,8 @@ class Mob(Entity):
 
 
 class Player(Entity):
-    armor = 0
     armor_lvl = 0
-    weapon_lvl = 0
+    weapon_lvl = 2
     hp = 6
     power = 1
     inventory = ['','','',

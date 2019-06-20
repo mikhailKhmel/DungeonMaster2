@@ -118,7 +118,7 @@ class Map(object):
         else:
             if self.maps[cur_i + 1][cur_j] == '2' or self.maps[cur_i][cur_j + 1] == '2' or self.maps[cur_i - 1][
                 cur_j] == '2' or self.maps[cur_i][cur_j - 1] == '2':
-                player.hp -= mob.power
+                player.hp -= mob.power - player.armor_lvl
                 render.attackMob(sc, player.location)
             else:
                 diffI = player.location[0] - cur_i
