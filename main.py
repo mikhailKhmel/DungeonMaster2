@@ -35,8 +35,6 @@ class Game(object):
 
     def renderView(self, god_mode):
         render.renderGame(sc, self.sector.maps, god_mode, self.player)
-        # render.lightZone(sc)
-        # sc.blit(lightZone, (0, 0))
 
     def initPlayer(self):
         self.player.hp = 6
@@ -121,8 +119,9 @@ class Game(object):
         while mode:
             pygame.display.update()
             clock.tick(self.getFps)
-            #здесь должно быть наложение селектора на предмет
+            render.renderInfoAboutPlayer(sc,self.player)
             render.renderInv(sc,self.player,mode,pos)
+            
             for e in pygame.event.get():
                 if e.type==pygame.KEYDOWN:
                     if e.key==pygame.K_LEFT:
@@ -133,6 +132,16 @@ class Game(object):
                             pos+=1
                     elif e.key==pygame.K_e:
                         mode=False
+                    elif e.key==pygame.K_SPACE:
+                        selected_item = self.player.inventory[pos]
+                        if selected_item == '':
+                            continue
+                        elif selected_item == 'potion':
+                            self.player.hp += 1
+                            self.player.inventory[pos] = ''
+                        elif selected_item == 'disk_lvl1':
+                            continue
+
 
     def menu(self, InProccess, sc):
         menu = True

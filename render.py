@@ -186,18 +186,22 @@ def renderInv(sc, player,mode,pos):
     inv_sc = pygame.Surface((160,105))
     
     if mode:
+        renderOnlyInv(inv_sc,player)
         surfSelect = pygame.Surface((54,53))
         surfSelect.set_alpha(200)
-        x=54*pos
+        
         if pos in [0,1,2]:
             y=0
+            x=54*pos
         else:
             y=53
+            x=54*(pos-3)
+            
         img = pygame.image.load(SELECTOR)
         img_rect = img.get_rect(topleft=(0,0))
         surfSelect.blit(img, img_rect)
         inv_sc.blit(surfSelect,(x,y))
-        renderOnlyInv(inv_sc,player)
+        
     else:
         renderOnlyInv(inv_sc,player)
 
