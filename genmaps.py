@@ -4,17 +4,31 @@ import entities
 import render
 
 
+class Room():
+    x1=0
+    x2=0
+
+    y1=0
+    y2=0
+
+    def __init__(self,x1,x2,y1,y2):
+        self.x1 = x1
+        self.x2 = x2
+        self.y1 = y1
+        self.y2 = y2
+
 class Map(object):
     length = 25
     maps = []
     center = []
+    rooms = []
     chests = []
     mobs = []
     def __init__(self):
         self.maps = [['1' for i in range(0, self.length)] for j in range(0, self.length)]
-        countofrooms = random.randint(5, 8)
+        countofrooms = random.randint(3,5)
         self.generateroom(countofrooms, True)
-        countofchests = random.randint(1, 4)
+        countofchests = random.randint(1, 2)
         self.setChests(countofchests, 1)
         self.setLadder()
         countofmobs = random.randint(len(self.center) // 2, len(self.center))
@@ -35,14 +49,30 @@ class Map(object):
         for j in range(min(firstcenter[1], secondcenter[1]), max(firstcenter[1], secondcenter[1]) + 1):
             self.maps[firstcenter[0]][j] = '0'
 
+    def check_intersection(self,r, newroom):
+        if (r.x1 <= newroom.x2 and r.x2>=newroom.x1 and r.y1 <= newroom.y2 and r.y2>= newroom.y1):
+            return True
+        else:
+            return False
+
     def generateroom(self, countofrooms, tunnels):
-        for n in range(0, countofrooms):
+        n=0
+        while n < countofrooms:
             w = random.randint(4, 6)
             h = random.randint(4, 6)
             x1 = random.randint(1, self.length - w - 1)
             x2 = x1 + w
             y1 = random.randint(1, self.length - h - 1)
             y2 = y1 + h
+            newroom = Room(x1,x2,y1,y2)
+            failed = False
+            for r in self.rooms:
+                if self.check_intersection(r,newroom):
+                    failed = True
+                    break
+            if failed:
+                continue
+            self.rooms.append(newroom)
             self.center.append([math.floor((x1 + x2) / 2), math.floor((y1 + y2) / 2)])
             for i in range(x1, x2):
                 for j in range(y1, y2):
@@ -50,6 +80,8 @@ class Map(object):
             if tunnels:
                 if n != 0:
                     self.generatetunnels(n)
+            n+=1
+
         print("System generated " + str(countofrooms) + " rooms")
 
     def setChests(self, count, level):

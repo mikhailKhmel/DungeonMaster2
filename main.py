@@ -132,15 +132,30 @@ class Game(object):
                             pos+=1
                     elif e.key==pygame.K_e:
                         mode=False
+                    # elif e.key==pygame.K_q:
+                    #     pass
                     elif e.key==pygame.K_SPACE:
                         selected_item = self.player.inventory[pos]
                         if selected_item == '':
                             continue
                         elif selected_item == 'potion':
-                            self.player.hp += 1
-                            self.player.inventory[pos] = ''
-                        elif selected_item == 'disk_lvl1':
-                            continue
+                            if self.player.hp == 6:
+                                continue
+                            else:
+                                self.player.hp += 1
+                                self.player.inventory[pos] = ''
+                        elif selected_item[:len(selected_item)-1] == 'disk_lvl':
+                            if int(selected_item[len(selected_item)-1]) <= self.player.weapon_lvl:
+                                continue
+                            else:
+                                self.player.weapon_lvl = int(selected_item[len(selected_item)-1])
+                                self.player.inventory[pos] = ''
+                        elif selected_item[:len(selected_item)-1] == 'armor_lvl':
+                            if int(selected_item[len(selected_item)-1]) <= self.player.armor_lvl:
+                                continue
+                            else:
+                                self.player.armor_lvl = int(selected_item[len(selected_item)-1])
+                                self.player.inventory[pos] = ''
 
 
     def menu(self, InProccess, sc):

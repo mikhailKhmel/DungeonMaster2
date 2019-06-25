@@ -36,11 +36,12 @@ CHEST = 'src/env/light/chest.bmp'
 INV_BACK = 'src/inv/new_inv.png'
 EMPTY_SLOT = 'src/inv/slot.png'
 SELECTOR = 'src/inv/selector.png'
-# ARMOR_LVL1 = 'src/inv/invarmour1.bmp'
-# ARMOR_LVL2 = 'src/inv/invarmour2.bmp'
-# ARMOR_LVL3 = 'src/inv/invarmour3.bmp'
-# ARMOR_LVL4 = 'src/inv/invarmour4.bmp'
-# ARMOR_LVL5 = 'src/inv/invarmour5.bmp'
+
+ARMOR_LVL1 = 'src/inv/armor_lvl1.png'
+ARMOR_LVL2 = 'src/inv/armor_lvl2.bmp'
+ARMOR_LVL3 = 'src/inv/armor_lvl3.bmp'
+ARMOR_LVL4 = 'src/inv/armor_lvl4.bmp'
+ARMOR_LVL5 = 'src/inv/armor_lvl5.bmp'
 
 DISK_LVL1 = 'src/inv/disk_lvl1.png'
 DISK_LVL2 = 'src/inv/disk_lvl2.png'
@@ -177,6 +178,11 @@ def renderOnlyInv(inv_sc,player):
             img_rect = img.get_rect(topleft=(x, y))
             inv_sc.blit(img, img_rect)
             x+=54
+        elif item == 'disk_lvl1':
+            img = pygame.image.load(DISK_LVL1)
+            img_rect = img.get_rect(topleft=(x, y))
+            inv_sc.blit(img, img_rect)
+            x+=54
         if c==2:
             x=0
             y+=53
@@ -217,7 +223,7 @@ def renderInfoAboutPlayer(sc,player):
     text_hp = f.render("HP:  "+str(bin(player.hp))[1:], 0, (250, 162, 2))
     info_sc.blit(text_hp, (0,0))
 
-    text_power = f.render("POWER:  "+str(bin(player.power))[1:], 0, (250, 162, 2))
+    text_power = f.render("POWER:  "+str(bin(player.power+player.weapon_lvl))[1:], 0, (250, 162, 2))
     info_sc.blit(text_power, (0,32))
 
     text_armor = f.render("ARMOR:  "+str(bin(player.armor_lvl))[1:], 0, (250, 162, 2))
@@ -245,22 +251,22 @@ def renderInfoAboutPlayer(sc,player):
 
     if player.armor_lvl == 0:
         img = pygame.image.load(EMPTY_SLOT)
-        info_sc.blit(img,(16,32*4))
+        info_sc.blit(img,(64+32,32*4))
     elif player.armor_lvl == 1:
         img = pygame.image.load(DISK_LVL1)
-        info_sc.blit(img,(16,32*4))
+        info_sc.blit(img,(64+32,32*4))
     elif player.armor_lvl == 2:
         img = pygame.image.load(DISK_LVL2)
-        info_sc.blit(img,(16,32*4))
+        info_sc.blit(img,(64+32,32*4))
     elif player.armor_lvl == 3:
         img = pygame.image.load(DISK_LVL3)
-        info_sc.blit(img,(16,32*4))
+        info_sc.blit(img,(64+32,32*4))
     elif player.armor_lvl == 4:
         img = pygame.image.load(DISK_LVL4)
-        info_sc.blit(img,(16,32*4))
+        info_sc.blit(img,(64+32,32*4))
     elif player.armor_lvl == 5:
         img = pygame.image.load(DISK_LVL5)
-        info_sc.blit(img,(16,32*4))
+        info_sc.blit(img,(64+32,32*4))
     
 
 
