@@ -5,7 +5,7 @@
 	In the Command Prompt: ...\DungeonMaster2-master> <code> python -m venv venv </code> <br>
 4. Activate virtual enviroment <br>
 	For Windows: <code>venv\Scripts\activate</code><br>
-	For Mac/Linux: <code>./venv/bin/activate</code><br>
+	For Mac/Linux: <code>source venv/bin/activate</code><br>
 5. Install Pygame <br>
 	<code>pip install pygame</code><br>
 6. Start the Game <br>
