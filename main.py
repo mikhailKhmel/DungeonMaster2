@@ -192,6 +192,47 @@ class Game(object):
                             menu = False
                         elif list_menu[pos] == 'exit':
                             quit()
+    
+    def checkChest(self):
+        x = self.player.location[0]
+        y = self.player.location[1]
+        if self.sector.maps[x-1][y] == '5' or self.sector.maps[x+1] == '5' or 
+        self.sector.maps[x][y-1] == '5' or self.sector.maps[x][y+1] == '5':
+            return True
+        else:
+            return False
+
+    def addToInvFromChest(self,item):
+        pos=0
+        for i in self.player.inventory:
+            if i == '':
+                self.player.inventory[pos] = item
+                return
+            else:
+                pos+=1
+
+    def openChest(self):
+        if self.checkChest():
+            r = random.randint(1,3)
+            if r in [1,2]:
+                self.addToInvFromChest('potion')
+                self.sector.maps[]
+                return
+            else:
+                r = random.randint(1,2)
+                if r==1:
+                    item = 'disk_lvl' + str(random.randint(1,self.level))
+                    self.addToInvFromChest(item)
+                    return
+                else:
+                    item = 'armor_lvl' + str(random.randint(1,self.level))
+                    self.addToInvFromChest(item)
+                    return
+        else:
+            return
+
+            
+
 
 
 god_mode = False
@@ -249,6 +290,8 @@ while True:
                     god_mode = True
                 else:
                     god_mode = False
+            elif i.key == pygame.K_r:
+                game.openChest()
             elif i.key==pygame.K_ESCAPE:
                 game.menu(True,sc)
             elif i.key==pygame.K_e:

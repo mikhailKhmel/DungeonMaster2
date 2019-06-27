@@ -91,8 +91,12 @@ class Map(object):
             x = locate[0] + random.randint(-2, 2)
             y = locate[1] + random.randint(-2, 2)
             if self.maps[x][y] == '0':
-                if self.maps[x - 1][y] == '5' or self.maps[x][y - 1] == '5' or self.maps[x + 1][y] == '5' or \
-                        self.maps[x][y + 1] == '5':
+                flag = False
+                for i in range(x-2,x+2):
+                    for j in range(y-2,y+2):
+                        if self.maps[i][j] == '5':
+                            flag = True
+                if flag:
                     continue
                 else:
                     self.chests.append(entities.Chest(i, level, x, y))
