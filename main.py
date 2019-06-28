@@ -6,7 +6,8 @@ import entities
 import render
 import time
 
-version = 'alpha 0.0.1'
+version = 'alpha 1.0.0'
+
 
 class Game(object):
     level = 1
@@ -16,8 +17,8 @@ class Game(object):
     def __init__(self, level):
         self.level = level
         self.__FPS = 15
-        self.__STEP = 64
-        self.__WINDOW_HEIGHT = 800
+        self.__STEP = 16
+        self.__WINDOW_HEIGHT = 960
         self.__WINDOW_WEIGHT = 800
 
     @property
@@ -33,19 +34,26 @@ class Game(object):
         return self.__WINDOW_HEIGHT, self.__WINDOW_WEIGHT
 
     def renderView(self, god_mode):
-        render.renderGame(sc, self.sector.maps, god_mode)
-        # render.lightZone(sc)
-        # sc.blit(lightZone, (0, 0))
+        render.renderGame(sc, self.sector.maps, god_mode, self.player)
 
-    def restartLevel(self):
-        countofrooms = random.randint(5, 10)
-        self.sector.generateroom(countofrooms, True)
-        countofchests = random.randint(2, countofrooms - math.floor(countofrooms / 2))
-        self.sector.setChests(countofchests, self.level)
-        self.sector.setLadder()
-        countofmobs = random.randint(5, 5 + self.level)
-        self.sector.setMobs(countofmobs, self.level)
-        self.player.location = self.sector.setPlayer()
+    def initPlayer(self):
+        self.player.hp = 6
+        self.player.armor = 0
+        self.player.armor_lvl=0
+        self.player.weapon_lvl=0
+        self.player.power=1
+        self.player.inventory=['','','','','','']
+        self.player.location=self.sector.setPlayer()
+
+    def restartLevel(self, new_player):
+        sc.fill((0,0,0))
+        self.sector.cleanUp()
+        self.sector.__init__()
+        if new_player:
+            self.initPlayer()
+        else:
+            self.player.location=self.sector.setPlayer()
+
 
     def increaseLevel(self):
         self.level += 1
@@ -55,7 +63,7 @@ class Game(object):
         self.player.location = self.sector.movePlayer(dx, dy, self.player)
         if self.player.location == [0, 0]:
             self.increaseLevel()
-            self.restartLevel()
+            self.restartLevel(False)
         else:
             return
 
@@ -63,13 +71,16 @@ class Game(object):
         self.sector.moveMobs(self.player, sc)
 
     def __searchMob(self, di, dj):
-        for mob in self.sector.mobs:
-            if mob.location == [self.player.location[0] + di, self.player.location[1] + dj]:
-                mob.hp -= self.player.power
-                render.attackMob(sc, mob.location)
-                if mob.hp <= 0:
-                    self.sector.mobs.remove(mob)
-                    self.sector.maps[self.player.location[0] + di][self.player.location[1] + dj] = '0'
+        tmp = self.sector.mobs
+        for i in range(0, len(tmp)):
+            if tmp[i].location == [self.player.location[0] + di, self.player.location[1] + dj]:
+                tmp[i].hp = tmp[i].hp - self.player.power
+                render.attackMob(sc, tmp[i].location)
+                if tmp[i].hp <= 0:
+                    tmp.remove(tmp[i])
+                    self.sector.maps[self.player.location[0] +
+                                     di][self.player.location[1] + dj] = '0'
+                self.sector.mobs = tmp
                 return True
         return False
 
@@ -85,8 +96,154 @@ class Game(object):
         elif self.sector.maps[current_locationI][current_locationJ - 1] == '3':
             self.__searchMob(0, -1)
 
+    def renderMenu(self, sc, pos, InProccess):
+        #sc.fill((0, 0, 0))
+        f = pygame.font.Font('src/Minecraftia.ttf', 48)
+        if InProccess:
+            menu = ['return', 'restart', 'exit']
+        else:
+            menu = ['start', 'exit']
+        y = 72
+        for i in range(0, len(menu)):
+            if i == pos:
+                t = f.render(menu[i], 0, (255, 255, 0))
+            else:
+                t = f.render(menu[i], 0, (255, 255, 255))
+            sc.blit(t, (0, y))
+            y += 72
+        return menu
 
-god_mode = True
+    def inv_mode(self):
+        mode = True
+        pos=0
+        while mode:
+            pygame.display.update()
+            clock.tick(self.getFps)
+            render.renderInfoAboutPlayer(sc,self.player)
+            render.renderInv(sc,self.player,mode,pos)
+            
+            for e in pygame.event.get():
+                if e.type==pygame.KEYDOWN:
+                    if e.key==pygame.K_LEFT:
+                        if pos!=0:
+                            pos-=1
+                    elif e.key==pygame.K_RIGHT:
+                        if pos!=5:
+                            pos+=1
+                    elif e.key==pygame.K_e:
+                        mode=False
+                    # elif e.key==pygame.K_q:
+                    #     pass
+                    elif e.key==pygame.K_SPACE:
+                        selected_item = self.player.inventory[pos]
+                        if selected_item == '':
+                            continue
+                        elif selected_item == 'potion':
+                            if self.player.hp == 6:
+                                continue
+                            else:
+                                self.player.hp += 1
+                                self.player.inventory[pos] = ''
+                        elif selected_item[:len(selected_item)-1] == 'disk_lvl':
+                            if int(selected_item[len(selected_item)-1]) <= self.player.weapon_lvl:
+                                continue
+                            else:
+                                self.player.weapon_lvl = int(selected_item[len(selected_item)-1])
+                                self.player.inventory[pos] = ''
+                        elif selected_item[:len(selected_item)-1] == 'armor_lvl':
+                            if int(selected_item[len(selected_item)-1]) <= self.player.armor_lvl:
+                                continue
+                            else:
+                                self.player.armor_lvl = int(selected_item[len(selected_item)-1])
+                                self.player.inventory[pos] = ''
+
+
+    def menu(self, InProccess, sc):
+        menu = True
+        pos = 0
+        while menu:
+            pygame.display.update()
+            clock.tick(game.getFps)
+
+            list_menu = game.renderMenu(sc, pos, InProccess)
+            length_menu=len(list_menu)
+            for e in pygame.event.get():
+                if e.type == pygame.QUIT:
+                    exit()
+                if e.type == pygame.KEYDOWN:
+                    if e.key == pygame.K_DOWN:
+                        if pos+1 > length_menu-1:
+                            pass
+                        else:
+                            pos += 1
+                    elif e.key == pygame.K_UP:
+                        if pos-1 < 0:
+                            pass
+                        else:
+                            pos -= 1
+                    elif e.key == pygame.K_ESCAPE:
+                        if list_menu[0] == 'start':
+                            quit()
+                    elif e.key == pygame.K_RETURN:
+                        if list_menu[pos] == 'start' or list_menu[pos] == 'return':
+                            menu = False
+                        elif list_menu[pos] == 'restart':
+                            self.restartLevel(True)
+                            menu = False
+                        elif list_menu[pos] == 'exit':
+                            quit()
+    
+    def checkChest(self):
+        x = self.player.location[0]
+        y = self.player.location[1]
+        if self.sector.maps[x-1][y] == '5':
+            return [x-1,y] 
+        elif self.sector.maps[x+1][y] == '5':
+            return [x+1,y]
+        elif self.sector.maps[x][y-1] == '5':
+            return [x,y-1]
+        elif self.sector.maps[x][y+1] == '5':
+            return [x,y-1]
+        else:
+            return []
+
+    def addToInvFromChest(self,item):
+        pos=0
+        for i in self.player.inventory:
+            if i == '':
+                self.player.inventory[pos] = item
+                return
+            else:
+                pos+=1
+
+    def openChest(self):
+        loc = self.checkChest()
+        if loc != []:
+            r = random.randint(1,3)
+            if r in [1,2]:
+                self.addToInvFromChest('potion')
+                self.sector.maps[loc[0]][loc[1]] = '0'
+                return
+            else:
+                r = random.randint(1,2)
+                if r==1:
+                    item = 'disk_lvl' + str(random.randint(1,self.level))
+                    self.addToInvFromChest(item)
+                    self.sector.maps[loc[0]][loc[1]] = '0'
+                    return
+                else:
+                    item = 'armor_lvl' + str(random.randint(1,self.level))
+                    self.addToInvFromChest(item)
+                    self.sector.maps[loc[0]][loc[1]] = '0'
+                    return
+        else:
+            return
+
+            
+
+
+
+god_mode = False
 game = Game(1)
 
 pygame.init()
@@ -95,6 +252,8 @@ lightZone = pygame.display.set_mode(game.getWindow)
 sc.blit(lightZone, (0, 0))
 clock = pygame.time.Clock()
 ###########
+
+game.menu(False,sc)
 
 game.renderView(god_mode)
 
@@ -105,8 +264,15 @@ while True:
     pygame.display.update()
     game.renderView(god_mode)
     move_key = False
-    # if game.player.hp<=0:
-    #     break
+    if game.player.hp <= 0:
+        sc.fill((255, 0, 0))
+        f = pygame.font.SysFont('CourerNew', 72)
+        gameover_text = f.render("GAME OVER", 0, (0, 0, 0))
+        sc.blit(gameover_text, (100, 100))
+        pygame.display.update()
+        time.sleep(2)
+        game.restartLevel(True)
+        game.menu(False,sc)
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
             exit()
@@ -132,5 +298,11 @@ while True:
                     god_mode = True
                 else:
                     god_mode = False
+            elif i.key == pygame.K_r:
+                game.openChest()
+            elif i.key==pygame.K_ESCAPE:
+                game.menu(True,sc)
+            elif i.key==pygame.K_e:
+                game.inv_mode()
             if move_key:
                 game.moveMobs()
