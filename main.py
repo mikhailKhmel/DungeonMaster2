@@ -6,7 +6,7 @@ import entities
 import render
 import time
 
-version = 'alpha 1.0.1'
+version = 'alpha 1.0.2'
 
 
 class Game(object):
@@ -226,13 +226,17 @@ class Game(object):
                 return
             else:
                 r = random.randint(1,2)
+                lvl = self.level
+                if lvl > 5:
+                    lvl=1
                 if r==1:
-                    item = 'disk_lvl' + str(random.randint(1,self.level))
+                    item = 'disk_lvl' + str(random.randint(1,lvl))
                     self.addToInvFromChest(item)
                     self.sector.maps[loc[0]][loc[1]] = '0'
                     return
                 else:
-                    item = 'armor_lvl' + str(random.randint(1,self.level))
+                    
+                    item = 'armor_lvl' + str(random.randint(1,lvl))
                     self.addToInvFromChest(item)
                     self.sector.maps[loc[0]][loc[1]] = '0'
                     return
@@ -271,6 +275,7 @@ while True:
         sc.blit(gameover_text, (100, 100))
         pygame.display.update()
         time.sleep(2)
+        game.level=1
         game.restartLevel(True)
         game.menu(False,sc)
     for i in pygame.event.get():

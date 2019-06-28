@@ -118,8 +118,10 @@ class Map(object):
 
     def setLadder(self):
         while True:
-            x = random.randint(0, self.length - 1)
-            y = random.randint(0, self.length - 1)
+            i = random.randint(0,len(self.center)-1)
+            curr = self.center[i]
+            x = curr[0]
+            y = curr[1]
             if self.maps[x][y] == '0':
                 self.maps[x][y] = '4'
                 return
@@ -129,6 +131,15 @@ class Map(object):
         while i < count:
             x = random.randint(0, self.length - 1)
             y = random.randint(0, self.length - 1)
+
+            flag = False
+            for k in range(x-1,x+1):
+                for l in range(y-1,y+1):
+                    if self.maps[k][l]=='2':
+                        flag=True
+            if flag:
+                continue
+
             if self.maps[x][y] == '0':
                 self.mobs.append(entities.Mob(i, level, x, y))
                 self.maps[x][y] = '3'

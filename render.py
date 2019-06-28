@@ -313,6 +313,7 @@ def renderInfoAboutPlayer(sc,player,lvl):
     text_inv = f.render("LVL: "+str(lvl),0,(250, 162, 2))
     info_sc.blit(text_inv, (0,32*12))
 
+
     sc.blit(info_sc, (800,0))
     return
 
