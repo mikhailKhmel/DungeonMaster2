@@ -11,11 +11,10 @@ class Entity(object):
 
 
 class Chest(Entity):
-    count_of_items = 0
 
     def __init__(self, id, level, x, y):
         super().__init__(id, level)
-        self.count_of_items = random.randint(1, 4)
+        
         self.location = [x, y]
         
 
@@ -25,15 +24,15 @@ class Mob(Entity):
 
     def __init__(self, id, level, x, y):
         super().__init__(id, level)
-        self.hp = random.randint(self.level, self.level + 2)
-        self.power = random.randint(self.level, self.level + 1)
+        self.power=random.randint(level,level+2)
+        self.hp=random.randint(level,level+1)
         self.location = [x, y]
 
 
 class Player(Entity):
     armor_lvl = 0
     weapon_lvl = 0
-    hp = 6
+    hp = 10
     power = 1
     inventory = ['','','',
                 '','','']

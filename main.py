@@ -6,12 +6,12 @@ import entities
 import render
 import time
 
-version = 'alpha 1.0.2'
+version = 'alpha 1.0.3'
 
 
 class Game(object):
     level = 1
-    sector = genmaps.Map()
+    sector = genmaps.Map(level=level)
     player = entities.Player(id=0, level=1, location=sector.setPlayer())
 
     def __init__(self, level):
@@ -34,10 +34,10 @@ class Game(object):
         return self.__WINDOW_HEIGHT, self.__WINDOW_WEIGHT
 
     def renderView(self, god_mode):
-        render.renderGame(sc, self.sector.maps, god_mode, self.player,self.level)
+        render.renderGame(sc, self.sector.maps, god_mode, self.player, self.level)
 
     def initPlayer(self):
-        self.player.hp = 6
+        self.player.hp = 10
         self.player.armor = 0
         self.player.armor_lvl=0
         self.player.weapon_lvl=0
@@ -48,7 +48,7 @@ class Game(object):
     def restartLevel(self, new_player):
         sc.fill((0,0,0))
         self.sector.cleanUp()
-        self.sector.__init__()
+        self.sector.__init__(level=self.level)
         if new_player:
             self.initPlayer()
         else:
@@ -139,7 +139,7 @@ class Game(object):
                         if selected_item == '':
                             continue
                         elif selected_item == 'potion':
-                            if self.player.hp == 6:
+                            if self.player.hp == 10:
                                 continue
                             else:
                                 self.player.hp += 1
@@ -149,6 +149,7 @@ class Game(object):
                                 continue
                             else:
                                 self.player.weapon_lvl = int(selected_item[len(selected_item)-1])
+                                self.player.power+=self.player.weapon_lvl
                                 self.player.inventory[pos] = ''
                         elif selected_item[:len(selected_item)-1] == 'armor_lvl':
                             if int(selected_item[len(selected_item)-1]) <= self.player.armor_lvl:
@@ -230,20 +231,46 @@ class Game(object):
                 if lvl > 5:
                     lvl=1
                 if r==1:
-                    item = 'disk_lvl' + str(random.randint(1,lvl))
+                    item = 'disk_lvl' + str(self.player.weapon_lvl+1)
                     self.addToInvFromChest(item)
                     self.sector.maps[loc[0]][loc[1]] = '0'
                     return
                 else:
                     
-                    item = 'armor_lvl' + str(random.randint(1,lvl))
+                    item = 'armor_lvl' + str(self.player.weapon_lvl+1)
                     self.addToInvFromChest(item)
                     self.sector.maps[loc[0]][loc[1]] = '0'
                     return
         else:
             return
-
-            
+        
+    def printLog(self):
+        print('LVL=',self.level)
+        print('MAP')
+        for i in self.sector.maps:
+            print (i)
+        print('MOBS')
+        for i in self.sector.mobs:
+            print('id=',i.id)
+            print('location=',i.location)
+            print('power=',i.power)
+            print('hp=',i.hp)
+            print('\n')
+        print('ROOMS')
+        for i in self.sector.rooms:
+            print([i.x1,i.x2,i.y1,i.y2])
+        print('CENTERS')
+        print(self.sector.center)
+        print('CHESTS')
+        for i in self.sector.chests:
+            print(i.location)
+        print('\nPLAYER LOG')
+        print(self.player.location)
+        print(self.player.hp)
+        print(self.player.power)
+        print(self.player.armor_lvl)
+        print(self.player.weapon_lvl)
+        print(self.player.inventory)
 
 
 
@@ -282,7 +309,7 @@ while True:
         if i.type == pygame.QUIT:
             exit()
         elif i.type == pygame.KEYDOWN:
-
+            game.printLog()
             if i.key == pygame.K_UP:
                 game.movePlayer(-1, 0)
                 move_key = True

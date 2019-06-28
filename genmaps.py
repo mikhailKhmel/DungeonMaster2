@@ -24,14 +24,14 @@ class Map(object):
     rooms = []
     chests = []
     mobs = []
-    def __init__(self):
+    def __init__(self,level):
         self.maps = [['1' for i in range(0, self.length)] for j in range(0, self.length)]
-        countofrooms = random.randint(3,5)
+        countofrooms = random.randint(level+2,level+3)
         self.generateroom(countofrooms, True)
-        countofchests = random.randint(1, 2)
+        countofchests = random.randint(1, 3)
         self.setChests(countofchests, 1)
         self.setLadder()
-        countofmobs = random.randint(len(self.center) // 2, len(self.center))
+        countofmobs = random.randint(level, level+5)
         self.setMobs(countofmobs, 1)
 
     def cleanUp(self):
@@ -89,17 +89,15 @@ class Map(object):
                 self.rooms=[]
                 self.center=[]
                 self.maps = [['1' for i in range(0, self.length)] for j in range(0, self.length)]
-
-            
-
-        print("System generated " + str(countofrooms) + " rooms")
+  
 
     def setChests(self, count, level):
-        i = 0
-        while i < count:
+        c = 0
+        while c < count:
             locate = random.choice(self.center)
             x = locate[0] + random.randint(-2, 2)
             y = locate[1] + random.randint(-2, 2)
+
             if self.maps[x][y] == '0':
                 flag = False
                 for i in range(x-2,x+2):
@@ -111,10 +109,10 @@ class Map(object):
                 else:
                     self.chests.append(entities.Chest(i, level, x, y))
                     self.maps[x][y] = '5'
-                    i += 1
+                    c += 1
             else:
                 continue
-        print(self.chests)
+
 
     def setLadder(self):
         while True:
@@ -141,7 +139,7 @@ class Map(object):
                 continue
 
             if self.maps[x][y] == '0':
-                self.mobs.append(entities.Mob(i, level, x, y))
+                self.mobs.append(entities.Mob(id=i, level=level, x=x, y=y))
                 self.maps[x][y] = '3'
                 i += 1
 
@@ -175,7 +173,8 @@ class Map(object):
         else:
             if self.maps[cur_i + 1][cur_j] == '2' or self.maps[cur_i][cur_j + 1] == '2' or self.maps[cur_i - 1][
                 cur_j] == '2' or self.maps[cur_i][cur_j - 1] == '2':
-                player.hp -= mob.power - player.armor_lvl
+                minus_hp = mob.power - player.armor_lvl
+                player.hp -= abs(minus_hp)
                 render.attackMob(sc, player.location)
             else:
                 diffI = player.location[0] - cur_i

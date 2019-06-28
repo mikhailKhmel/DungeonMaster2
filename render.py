@@ -317,7 +317,7 @@ def renderInfoAboutPlayer(sc,player,lvl):
     sc.blit(info_sc, (800,0))
     return
 
-def renderGame(sc, sector, god_mode, player,lvl):
+def renderGame(sc, sector, god_mode, player, lvl):
     if god_mode:
         x = 0
         y = 0
