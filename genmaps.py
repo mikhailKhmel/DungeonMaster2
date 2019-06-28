@@ -26,9 +26,9 @@ class Map(object):
     mobs = []
     def __init__(self,level):
         self.maps = [['1' for i in range(0, self.length)] for j in range(0, self.length)]
-        countofrooms = random.randint(level+2,level+3)
+        countofrooms = random.randint(3,7)
         self.generateroom(countofrooms, True)
-        countofchests = random.randint(1, 3)
+        countofchests = random.randint(2, 4)
         self.setChests(countofchests, 1)
         self.setLadder()
         countofmobs = random.randint(level, level+5)

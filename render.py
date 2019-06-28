@@ -251,7 +251,7 @@ def renderInv(sc, player,mode,pos):
     
     sc.blit(inv_sc, (800, 32*7))
 
-def renderInfoAboutPlayer(sc,player,lvl):
+def renderInfoAboutPlayer(sc,player,lvl,countofmobs):
     info_sc = pygame.Surface((160, 800))
     info_sc.fill((5, 67, 187))
 
@@ -310,14 +310,16 @@ def renderInfoAboutPlayer(sc,player,lvl):
     text_inv = f.render("INVENTORY: ",0,(250, 162, 2))
     info_sc.blit(text_inv, (0,32*6))
 
-    text_inv = f.render("LVL: "+str(lvl),0,(250, 162, 2))
+    text_inv = f.render("LVL: "+str(bin(lvl))[1:],0,(250, 162, 2))
     info_sc.blit(text_inv, (0,32*12))
 
+    text_inv = f.render("MOBS: \n"+str(bin(countofmobs))[1:],0,(250, 162, 2))
+    info_sc.blit(text_inv, (0,32*13))
 
     sc.blit(info_sc, (800,0))
     return
 
-def renderGame(sc, sector, god_mode, player, lvl):
+def renderGame(sc, sector, god_mode, player, lvl, countofmobs):
     if god_mode:
         x = 0
         y = 0
@@ -341,7 +343,7 @@ def renderGame(sc, sector, god_mode, player, lvl):
             x += STEP
         x = 0
         y += STEP
-    renderInfoAboutPlayer(sc,player,lvl)
+    renderInfoAboutPlayer(sc,player,lvl,countofmobs)
     renderInv(sc, player, False, -1)
 
 

@@ -16,7 +16,7 @@ class Game(object):
 
     def __init__(self, level):
         self.level = level
-        self.__FPS = 15
+        self.__FPS = 30
         self.__STEP = 16
         self.__WINDOW_HEIGHT = 960
         self.__WINDOW_WEIGHT = 800
@@ -34,7 +34,7 @@ class Game(object):
         return self.__WINDOW_HEIGHT, self.__WINDOW_WEIGHT
 
     def renderView(self, god_mode):
-        render.renderGame(sc, self.sector.maps, god_mode, self.player, self.level)
+        render.renderGame(sc, self.sector.maps, god_mode, self.player, self.level, len(self.sector.mobs))
 
     def initPlayer(self):
         self.player.hp = 10
@@ -56,6 +56,8 @@ class Game(object):
 
 
     def increaseLevel(self):
+        global zero_mobs
+        zero_mobs = False
         self.level += 1
         self.sector.cleanUp()
 
@@ -119,7 +121,7 @@ class Game(object):
         while mode:
             pygame.display.update()
             clock.tick(self.getFps)
-            render.renderInfoAboutPlayer(sc,self.player,self.level)
+            render.renderInfoAboutPlayer(sc,self.player,self.level,len(self.sector.mobs))
             render.renderInv(sc,self.player,mode,pos)
             
             for e in pygame.event.get():
@@ -275,6 +277,7 @@ class Game(object):
 
 
 god_mode = False
+zero_mobs = False
 game = Game(1)
 
 pygame.init()
@@ -290,39 +293,70 @@ game.renderView(god_mode)
 
 ###########
 pygame.display.update()
+mob_clk=0
+move_clk=0
 while True:
-    clock.tick(game.getFps)
+    fps=game.getFps
+    clock.tick(fps)
     pygame.display.update()
     game.renderView(god_mode)
     move_key = False
     if game.player.hp <= 0:
         sc.fill((255, 0, 0))
-        f = pygame.font.SysFont('CourerNew', 72)
+        f = pygame.font.Font('src/Minecraftia.ttf', 48)
         gameover_text = f.render("GAME OVER", 0, (0, 0, 0))
-        sc.blit(gameover_text, (100, 100))
+        sc.blit(gameover_text, (500, 500))
         pygame.display.update()
         time.sleep(2)
         game.level=1
         game.restartLevel(True)
         game.menu(False,sc)
+    
+    keys = pygame.key.get_pressed()
+    delay = 2
+    if keys[pygame.K_UP]:
+        if move_clk==delay:
+            game.movePlayer(-1, 0)
+            move_clk=0
+        else:
+            move_clk+=1
+    elif keys[pygame.K_DOWN]:
+        if move_clk==delay:
+            game.movePlayer(1, 0)
+            move_clk=0
+        else:
+            move_clk+=1
+    elif keys[pygame.K_RIGHT]:
+        if move_clk==delay:
+            game.movePlayer(0, 1)
+            move_clk=0
+        else:
+            move_clk+=1
+    elif keys[pygame.K_LEFT]:
+        if move_clk==delay:
+            game.movePlayer(0,-1)
+            move_clk=0
+        else:
+            move_clk+=1
+
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
             exit()
         elif i.type == pygame.KEYDOWN:
             game.printLog()
-            if i.key == pygame.K_UP:
-                game.movePlayer(-1, 0)
-                move_key = True
-            elif i.key == pygame.K_DOWN:
-                game.movePlayer(1, 0)
-                move_key = True
-            elif i.key == pygame.K_LEFT:
-                game.movePlayer(0, -1)
-                move_key = True
-            elif i.key == pygame.K_RIGHT:
-                game.movePlayer(0, 1)
-                move_key = True
-            elif i.key == pygame.K_SPACE:
+            # if i.key == pygame.K_UP:
+            #     game.movePlayer(-1, 0)
+            #     move_key = True
+            # elif i.key == pygame.K_DOWN:
+            #     game.movePlayer(1, 0)
+            #     move_key = True
+            # elif i.key == pygame.K_LEFT:
+            #     game.movePlayer(0, -1)
+            #     move_key = True
+            # elif i.key == pygame.K_RIGHT:
+            #     game.movePlayer(0, 1)
+            #     move_key = True
+            if i.key == pygame.K_SPACE:
                 game.playerAttackMob()
                 move_key = True
             elif i.key == pygame.K_p:
@@ -336,5 +370,14 @@ while True:
                 game.menu(True,sc)
             elif i.key==pygame.K_e:
                 game.inv_mode()
-            if move_key:
-                game.moveMobs()
+                
+    if mob_clk==int(fps/2):
+        game.moveMobs()
+        mob_clk=0
+    else:
+        mob_clk+=1
+    
+    
+    if len(game.sector.mobs)==0 and not zero_mobs:
+        game.addToInvFromChest('potion')
+        zero_mobs = True
