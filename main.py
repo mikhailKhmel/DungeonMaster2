@@ -6,7 +6,7 @@ import entities
 import render
 import time
 
-version = 'alpha 1.0.0'
+version = 'alpha 1.0.1'
 
 
 class Game(object):
@@ -34,7 +34,7 @@ class Game(object):
         return self.__WINDOW_HEIGHT, self.__WINDOW_WEIGHT
 
     def renderView(self, god_mode):
-        render.renderGame(sc, self.sector.maps, god_mode, self.player)
+        render.renderGame(sc, self.sector.maps, god_mode, self.player,self.level)
 
     def initPlayer(self):
         self.player.hp = 6
@@ -119,7 +119,7 @@ class Game(object):
         while mode:
             pygame.display.update()
             clock.tick(self.getFps)
-            render.renderInfoAboutPlayer(sc,self.player)
+            render.renderInfoAboutPlayer(sc,self.player,self.level)
             render.renderInv(sc,self.player,mode,pos)
             
             for e in pygame.event.get():
@@ -203,7 +203,7 @@ class Game(object):
         elif self.sector.maps[x][y-1] == '5':
             return [x,y-1]
         elif self.sector.maps[x][y+1] == '5':
-            return [x,y-1]
+            return [x,y+1]
         else:
             return []
 

@@ -87,7 +87,7 @@ def renderLightZone(sc, sector, x, y, i, j):
 
     startX = x - STEP * 2
     startY = y - STEP * 2
-    
+
     x = startX
     y = startY
 
@@ -251,7 +251,7 @@ def renderInv(sc, player,mode,pos):
     
     sc.blit(inv_sc, (800, 32*7))
 
-def renderInfoAboutPlayer(sc,player):
+def renderInfoAboutPlayer(sc,player,lvl):
     info_sc = pygame.Surface((160, 800))
     info_sc.fill((5, 67, 187))
 
@@ -310,10 +310,13 @@ def renderInfoAboutPlayer(sc,player):
     text_inv = f.render("INVENTORY: ",0,(250, 162, 2))
     info_sc.blit(text_inv, (0,32*6))
 
+    text_inv = f.render("LVL: "+str(lvl),0,(250, 162, 2))
+    info_sc.blit(text_inv, (0,32*12))
+
     sc.blit(info_sc, (800,0))
     return
 
-def renderGame(sc, sector, god_mode, player):
+def renderGame(sc, sector, god_mode, player,lvl):
     if god_mode:
         x = 0
         y = 0
@@ -337,7 +340,7 @@ def renderGame(sc, sector, god_mode, player):
             x += STEP
         x = 0
         y += STEP
-    renderInfoAboutPlayer(sc,player)
+    renderInfoAboutPlayer(sc,player,lvl)
     renderInv(sc, player, False, -1)
 
 

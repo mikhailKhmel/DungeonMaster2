@@ -39,6 +39,7 @@ class Map(object):
         self.center = []
         self.chests = []
         self.mobs = []
+        self.rooms = []
 
     def generatetunnels(self, n):
         firstcenter = self.center[n - 1]
@@ -57,6 +58,7 @@ class Map(object):
 
     def generateroom(self, countofrooms, tunnels):
         n=0
+        c=0
         while n < countofrooms:
             w = random.randint(4, 6)
             h = random.randint(4, 6)
@@ -81,6 +83,14 @@ class Map(object):
                 if n != 0:
                     self.generatetunnels(n)
             n+=1
+            if c>100:
+                c=0
+                n=0
+                self.rooms=[]
+                self.center=[]
+                self.maps = [['1' for i in range(0, self.length)] for j in range(0, self.length)]
+
+            
 
         print("System generated " + str(countofrooms) + " rooms")
 
