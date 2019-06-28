@@ -6,7 +6,7 @@ import entities
 import render
 import time
 
-version = 'alpha 0.0.2'
+version = 'alpha 1.0.0'
 
 
 class Game(object):
@@ -196,11 +196,16 @@ class Game(object):
     def checkChest(self):
         x = self.player.location[0]
         y = self.player.location[1]
-        if self.sector.maps[x-1][y] == '5' or self.sector.maps[x+1] == '5' or 
-        self.sector.maps[x][y-1] == '5' or self.sector.maps[x][y+1] == '5':
-            return True
+        if self.sector.maps[x-1][y] == '5':
+            return [x-1,y] 
+        elif self.sector.maps[x+1][y] == '5':
+            return [x+1,y]
+        elif self.sector.maps[x][y-1] == '5':
+            return [x,y-1]
+        elif self.sector.maps[x][y+1] == '5':
+            return [x,y-1]
         else:
-            return False
+            return []
 
     def addToInvFromChest(self,item):
         pos=0
@@ -212,21 +217,24 @@ class Game(object):
                 pos+=1
 
     def openChest(self):
-        if self.checkChest():
+        loc = self.checkChest()
+        if loc != []:
             r = random.randint(1,3)
             if r in [1,2]:
                 self.addToInvFromChest('potion')
-                self.sector.maps[]
+                self.sector.maps[loc[0]][loc[1]] = '0'
                 return
             else:
                 r = random.randint(1,2)
                 if r==1:
                     item = 'disk_lvl' + str(random.randint(1,self.level))
                     self.addToInvFromChest(item)
+                    self.sector.maps[loc[0]][loc[1]] = '0'
                     return
                 else:
                     item = 'armor_lvl' + str(random.randint(1,self.level))
                     self.addToInvFromChest(item)
+                    self.sector.maps[loc[0]][loc[1]] = '0'
                     return
         else:
             return

@@ -38,10 +38,10 @@ EMPTY_SLOT = 'src/inv/slot.png'
 SELECTOR = 'src/inv/selector.png'
 
 ARMOR_LVL1 = 'src/inv/armor_lvl1.png'
-ARMOR_LVL2 = 'src/inv/armor_lvl2.bmp'
-ARMOR_LVL3 = 'src/inv/armor_lvl3.bmp'
-ARMOR_LVL4 = 'src/inv/armor_lvl4.bmp'
-ARMOR_LVL5 = 'src/inv/armor_lvl5.bmp'
+ARMOR_LVL2 = 'src/inv/armor_lvl2.png'
+ARMOR_LVL3 = 'src/inv/armor_lvl3.png'
+ARMOR_LVL4 = 'src/inv/armor_lvl4.png'
+ARMOR_LVL5 = 'src/inv/armor_lvl5.png'
 
 DISK_LVL1 = 'src/inv/disk_lvl1.png'
 DISK_LVL2 = 'src/inv/disk_lvl2.png'
@@ -86,18 +86,10 @@ def renderLightZone(sc, sector, x, y, i, j):
     endJ = startJ + 5
 
     startX = x - STEP * 2
-    endX = startX + 5 * STEP
     startY = y - STEP * 2
-    endY = startY + 5 * STEP
-
+    
     x = startX
     y = startY
-    # for i in range(startI, endI):
-    #     for j in range(startJ, endJ):
-    #         blitImg(sc, sector[i][j], x, y)
-    #         x += STEP
-    #     x = startX
-    #     y += STEP
 
     c = 0
     sector1 = [1, 2, 3]
@@ -183,6 +175,51 @@ def renderOnlyInv(inv_sc,player):
             img_rect = img.get_rect(topleft=(x, y))
             inv_sc.blit(img, img_rect)
             x+=54
+        elif item == 'disk_lvl2':
+            img = pygame.image.load(DISK_LVL2)
+            img_rect = img.get_rect(topleft=(x, y))
+            inv_sc.blit(img, img_rect)
+            x+=54
+        elif item == 'disk_lvl3':
+            img = pygame.image.load(DISK_LVL3)
+            img_rect = img.get_rect(topleft=(x, y))
+            inv_sc.blit(img, img_rect)
+            x+=54
+        elif item == 'disk_lvl4':
+            img = pygame.image.load(DISK_LVL4)
+            img_rect = img.get_rect(topleft=(x, y))
+            inv_sc.blit(img, img_rect)
+            x+=54
+        elif item == 'disk_lvl5':
+            img = pygame.image.load(DISK_LVL5)
+            img_rect = img.get_rect(topleft=(x, y))
+            inv_sc.blit(img, img_rect)
+            x+=54
+        elif item == 'armor_lvl1':
+            img = pygame.image.load(ARMOR_LVL1)
+            img_rect = img.get_rect(topleft=(x, y))
+            inv_sc.blit(img, img_rect)
+            x+=54
+        elif item == 'armor_lvl2':
+            img = pygame.image.load(ARMOR_LVL2)
+            img_rect = img.get_rect(topleft=(x, y))
+            inv_sc.blit(img, img_rect)
+            x+=54
+        elif item == 'armor_lvl3':
+            img = pygame.image.load(ARMOR_LVL3)
+            img_rect = img.get_rect(topleft=(x, y))
+            inv_sc.blit(img, img_rect)
+            x+=54
+        elif item == 'armor_lvl4':
+            img = pygame.image.load(ARMOR_LVL4)
+            img_rect = img.get_rect(topleft=(x, y))
+            inv_sc.blit(img, img_rect)
+            x+=54
+        elif item == 'armor_lvl5':
+            img = pygame.image.load(ARMOR_LVL5)
+            img_rect = img.get_rect(topleft=(x, y))
+            inv_sc.blit(img, img_rect)
+            x+=54
         if c==2:
             x=0
             y+=53
@@ -253,19 +290,19 @@ def renderInfoAboutPlayer(sc,player):
         img = pygame.image.load(EMPTY_SLOT)
         info_sc.blit(img,(64+32,32*4))
     elif player.armor_lvl == 1:
-        img = pygame.image.load(DISK_LVL1)
+        img = pygame.image.load(ARMOR_LVL1)
         info_sc.blit(img,(64+32,32*4))
     elif player.armor_lvl == 2:
-        img = pygame.image.load(DISK_LVL2)
+        img = pygame.image.load(ARMOR_LVL2)
         info_sc.blit(img,(64+32,32*4))
     elif player.armor_lvl == 3:
-        img = pygame.image.load(DISK_LVL3)
+        img = pygame.image.load(ARMOR_LVL3)
         info_sc.blit(img,(64+32,32*4))
     elif player.armor_lvl == 4:
-        img = pygame.image.load(DISK_LVL4)
+        img = pygame.image.load(ARMOR_LVL4)
         info_sc.blit(img,(64+32,32*4))
     elif player.armor_lvl == 5:
-        img = pygame.image.load(DISK_LVL5)
+        img = pygame.image.load(ARMOR_LVL5)
         info_sc.blit(img,(64+32,32*4))
     
 
