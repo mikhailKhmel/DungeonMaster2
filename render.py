@@ -170,53 +170,14 @@ def renderOnlyInv(inv_sc,player):
             img_rect = img.get_rect(topleft=(x, y))
             inv_sc.blit(img, img_rect)
             x+=54
-        elif item == 'disk_lvl1':
-            img = pygame.image.load(DISK_LVL1)
+        elif item == 'disk_lvl':
+            img = pygame.image.load('src/inv/disk_lvl'+random.randin(1,5)+'.png')
             img_rect = img.get_rect(topleft=(x, y))
             inv_sc.blit(img, img_rect)
             x+=54
-        elif item == 'disk_lvl2':
-            img = pygame.image.load(DISK_LVL2)
-            img_rect = img.get_rect(topleft=(x, y))
-            inv_sc.blit(img, img_rect)
-            x+=54
-        elif item == 'disk_lvl3':
-            img = pygame.image.load(DISK_LVL3)
-            img_rect = img.get_rect(topleft=(x, y))
-            inv_sc.blit(img, img_rect)
-            x+=54
-        elif item == 'disk_lvl4':
-            img = pygame.image.load(DISK_LVL4)
-            img_rect = img.get_rect(topleft=(x, y))
-            inv_sc.blit(img, img_rect)
-            x+=54
-        elif item == 'disk_lvl5':
-            img = pygame.image.load(DISK_LVL5)
-            img_rect = img.get_rect(topleft=(x, y))
-            inv_sc.blit(img, img_rect)
-            x+=54
-        elif item == 'armor_lvl1':
-            img = pygame.image.load(ARMOR_LVL1)
-            img_rect = img.get_rect(topleft=(x, y))
-            inv_sc.blit(img, img_rect)
-            x+=54
-        elif item == 'armor_lvl2':
-            img = pygame.image.load(ARMOR_LVL2)
-            img_rect = img.get_rect(topleft=(x, y))
-            inv_sc.blit(img, img_rect)
-            x+=54
-        elif item == 'armor_lvl3':
-            img = pygame.image.load(ARMOR_LVL3)
-            img_rect = img.get_rect(topleft=(x, y))
-            inv_sc.blit(img, img_rect)
-            x+=54
-        elif item == 'armor_lvl4':
-            img = pygame.image.load(ARMOR_LVL4)
-            img_rect = img.get_rect(topleft=(x, y))
-            inv_sc.blit(img, img_rect)
-            x+=54
-        elif item == 'armor_lvl5':
-            img = pygame.image.load(ARMOR_LVL5)
+        
+        elif item == 'armor_lvl':
+            img = pygame.image.load('src/inv/armor_lvl'+random.randin(1,5)+'.png')            
             img_rect = img.get_rect(topleft=(x, y))
             inv_sc.blit(img, img_rect)
             x+=54
