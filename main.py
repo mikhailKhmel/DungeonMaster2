@@ -6,7 +6,7 @@ import entities
 import render
 import time
 
-version = 'alpha 1.1.1'
+version = 'alpha 1.1.2'
 
 
 class Game(object):
@@ -151,7 +151,7 @@ class Game(object):
                                 continue
                             else:
                                 self.player.weapon_lvl = int(selected_item[len(selected_item)-1])
-                                self.player.power+=self.player.weapon_lvl
+                                self.player.power = 1 + self.player.weapon_lvl
                                 self.player.inventory[pos] = ''
                         elif selected_item[:len(selected_item)-1] == 'armor_lvl':
                             if int(selected_item[len(selected_item)-1]) <= self.player.armor_lvl:
@@ -233,13 +233,13 @@ class Game(object):
                 if lvl > 5:
                     lvl=1
                 if r==1:
-                    item = 'disk_lvl' + str(self.player.weapon_lvl+1)
+                    item = 'disk_lvl' + str(self.player.weapon_lvl+lvl)
                     self.addToInvFromChest(item)
                     self.sector.maps[loc[0]][loc[1]] = '0'
                     return
                 else:
                     
-                    item = 'armor_lvl' + str(self.player.weapon_lvl+1)
+                    item = 'armor_lvl' + str(self.player.weapon_lvl+lvl)
                     self.addToInvFromChest(item)
                     self.sector.maps[loc[0]][loc[1]] = '0'
                     return

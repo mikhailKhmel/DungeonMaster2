@@ -183,16 +183,16 @@ class Map(object):
                 dj = []
                 if diffI < 0 and diffJ < 0:  # в зависимости от разницы составляются "векторы" направления моба
                     di = [-2, -1]
-                    dj = [-2, -1]
+                    dj = [-1,-2]
                 elif diffI > 0 and diffJ < 0:
-                    di = [2, 1]
+                    di = [1,2]
                     dj = [-2, -1]
                 elif diffI < 0 and diffJ > 0:
                     di = [-2, -1]
-                    dj = [2, 1]
+                    dj = [1,2]
                 elif diffI > 0 and diffJ > 0:
                     di = [2, 1]
-                    dj = [2, 1]
+                    dj = [1,2]
                 elif diffI == 0 and diffJ <= 0:
                     di = [0, 0]
                     dj = [-2, -1]
