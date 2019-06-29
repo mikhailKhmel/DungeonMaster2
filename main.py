@@ -229,15 +229,15 @@ class Game(object):
                 return
             else:
                 r = random.randint(1,2)
-                lvl = self.level
+
                 if r==1:
-                    item = 'disk_lvl' + str(self.player.weapon_lvl+lvl)
+                    item = 'disk_lvl' + str(self.player.weapon_lvl+1)
                     self.addToInvFromChest(item)
                     self.sector.maps[loc[0]][loc[1]] = '0'
                     return
                 else:
                     
-                    item = 'armor_lvl' + str(self.player.weapon_lvl+lvl)
+                    item = 'armor_lvl' + str(self.player.weapon_lvl+1)
                     self.addToInvFromChest(item)
                     self.sector.maps[loc[0]][loc[1]] = '0'
                     return
