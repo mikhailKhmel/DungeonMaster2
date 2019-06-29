@@ -6,7 +6,7 @@ import entities
 import render
 import time
 
-version = 'alpha 1.1'
+version = 'alpha 1.1.1'
 
 
 class Game(object):
@@ -134,8 +134,8 @@ class Game(object):
                             pos+=1
                     elif e.key==pygame.K_e:
                         mode=False
-                    # elif e.key==pygame.K_q:
-                    #     pass
+                    elif e.key==pygame.K_q:
+                        self.player.inventory[pos] = ''
                     elif e.key==pygame.K_SPACE:
                         selected_item = self.player.inventory[pos]
                         if selected_item == '':
