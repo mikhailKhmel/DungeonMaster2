@@ -6,7 +6,7 @@ import entities
 import render
 import time
 
-version = 'alpha 1.1.2'
+version = 'alpha 1.1.3'
 
 
 class Game(object):
@@ -230,8 +230,6 @@ class Game(object):
             else:
                 r = random.randint(1,2)
                 lvl = self.level
-                if lvl > 5:
-                    lvl=1
                 if r==1:
                     item = 'disk_lvl' + str(self.player.weapon_lvl+lvl)
                     self.addToInvFromChest(item)

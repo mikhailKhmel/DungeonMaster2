@@ -266,42 +266,47 @@ def renderInfoAboutPlayer(sc,player,lvl,countofmobs):
     text_armor = f.render("ARMOR:  "+str(bin(player.armor_lvl))[1:], 0, (250, 162, 2))
     info_sc.blit(text_armor, (0,64))
 
-    
-    if player.weapon_lvl == 0:
+    wp_lvl = player.weapon_lvl
+    if wp_lvl>5:
+        wp_lvl-=5
+    if wp_lvl == 0:
         img = pygame.image.load(EMPTY_SLOT)
         info_sc.blit(img,(16,32*4))
-    elif player.weapon_lvl == 1:
+    elif wp_lvl == 1:
         img = pygame.image.load(DISK_LVL1)
         info_sc.blit(img,(16,32*4))
-    elif player.weapon_lvl == 2:
+    elif wp_lvl == 2:
         img = pygame.image.load(DISK_LVL2)
         info_sc.blit(img,(16,32*4))
-    elif player.weapon_lvl == 3:
+    elif wp_lvl == 3:
         img = pygame.image.load(DISK_LVL3)
         info_sc.blit(img,(16,32*4))
-    elif player.weapon_lvl == 4:
+    elif wp_lvl == 4:
         img = pygame.image.load(DISK_LVL4)
         info_sc.blit(img,(16,32*4))
-    elif player.weapon_lvl == 5:
+    elif wp_lvl == 5:
         img = pygame.image.load(DISK_LVL5)
         info_sc.blit(img,(16,32*4))
 
-    if player.armor_lvl == 0:
+    arm_lvl = player.armor_lvl
+    if arm_lvl>5:
+        arm_lvl-=5
+    if arm_lvl == 0:
         img = pygame.image.load(EMPTY_SLOT)
         info_sc.blit(img,(64+32,32*4))
-    elif player.armor_lvl == 1:
+    elif arm_lvl == 1:
         img = pygame.image.load(ARMOR_LVL1)
         info_sc.blit(img,(64+32,32*4))
-    elif player.armor_lvl == 2:
+    elif arm_lvl == 2:
         img = pygame.image.load(ARMOR_LVL2)
         info_sc.blit(img,(64+32,32*4))
-    elif player.armor_lvl == 3:
+    elif arm_lvl == 3:
         img = pygame.image.load(ARMOR_LVL3)
         info_sc.blit(img,(64+32,32*4))
-    elif player.armor_lvl == 4:
+    elif arm_lvl == 4:
         img = pygame.image.load(ARMOR_LVL4)
         info_sc.blit(img,(64+32,32*4))
-    elif player.armor_lvl == 5:
+    elif arm_lvl == 5:
         img = pygame.image.load(ARMOR_LVL5)
         info_sc.blit(img,(64+32,32*4))
     
