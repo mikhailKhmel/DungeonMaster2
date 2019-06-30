@@ -1,5 +1,5 @@
 import pygame
-
+import random
 
 STEP = 32
 WINDOW_HEIGHT = 1024
@@ -170,14 +170,14 @@ def renderOnlyInv(inv_sc,player):
             img_rect = img.get_rect(topleft=(x, y))
             inv_sc.blit(img, img_rect)
             x+=54
-        elif item == 'disk_lvl':
-            img = pygame.image.load('src/inv/disk_lvl'+random.randin(1,5)+'.png')
+        elif item[:len(item)-1] == 'disk_lvl':
+            img = pygame.image.load('src/inv/disk_lvl'+str(random.randint(1,5))+'.png')
             img_rect = img.get_rect(topleft=(x, y))
             inv_sc.blit(img, img_rect)
             x+=54
         
-        elif item == 'armor_lvl':
-            img = pygame.image.load('src/inv/armor_lvl'+random.randin(1,5)+'.png')            
+        elif item[:len(item)-1] == 'armor_lvl':
+            img = pygame.image.load('src/inv/armor_lvl'+str(random.randint(1,5))+'.png')            
             img_rect = img.get_rect(topleft=(x, y))
             inv_sc.blit(img, img_rect)
             x+=54

@@ -6,7 +6,7 @@ import entities
 import render
 import time
 
-version = 'alpha 1.1.3'
+version = 'alpha 1.1.4'
 
 
 class Game(object):
@@ -16,7 +16,7 @@ class Game(object):
 
     def __init__(self, level):
         self.level = level
-        self.__FPS = 30
+        self.__FPS = 15
         self.__STEP = 16
         self.__WINDOW_HEIGHT = 960
         self.__WINDOW_WEIGHT = 800
@@ -132,6 +132,13 @@ class Game(object):
                     elif e.key==pygame.K_RIGHT:
                         if pos!=5:
                             pos+=1
+                    elif e.key==pygame.K_UP:
+                        if pos not in [0,1,2]:
+                            pos-=3
+                    elif e.key==pygame.K_DOWN:
+                        if pos not in [3,4,5]:
+                            pos+=3
+                    
                     elif e.key==pygame.K_e:
                         mode=False
                     elif e.key==pygame.K_q:
