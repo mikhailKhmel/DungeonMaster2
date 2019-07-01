@@ -12,7 +12,7 @@ version = 'alpha 1.1.5'
 class Game(object):
     level = 1
     sector = genmaps.Map(level=level)
-    player = entities.Player(id=0, level=1, location=sector.setPlayer())
+    player = entities.Player(id=0, location=sector.setPlayer())
 
     def __init__(self, level):
         self.level = level
@@ -47,7 +47,6 @@ class Game(object):
 
     def restartLevel(self, new_player):
         sc.fill((0,0,0))
-        self.sector.cleanUp()
         self.sector.__init__(level=self.level)
         if new_player:
             self.initPlayer()
@@ -59,7 +58,6 @@ class Game(object):
         global zero_mobs
         zero_mobs = False
         self.level += 1
-        self.sector.cleanUp()
 
     def movePlayer(self, dx, dy):
         self.player.location = self.sector.movePlayer(dx, dy, self.player)
@@ -194,6 +192,8 @@ class Game(object):
                     elif e.key == pygame.K_ESCAPE:
                         if list_menu[0] == 'start':
                             quit()
+                        else:
+                            menu = False
                     elif e.key == pygame.K_RETURN:
                         if list_menu[pos] == 'start' or list_menu[pos] == 'return':
                             menu = False
@@ -348,7 +348,7 @@ while True:
         if i.type == pygame.QUIT:
             exit()
         elif i.type == pygame.KEYDOWN:
-            #game.printLog()
+            game.printLog()
             # if i.key == pygame.K_UP:
             #     game.movePlayer(-1, 0)
             #     move_key = True

@@ -5,15 +5,14 @@ class Entity(object):
     id = 0
     location = [0, 0]
 
-    def __init__(self, id, level):
+    def __init__(self, id):
         self.id = id
-        self.level = level
 
 
 class Chest(Entity):
 
-    def __init__(self, id, level, x, y):
-        super().__init__(id, level)
+    def __init__(self, id, x, y):
+        super().__init__(id)
         
         self.location = [x, y]
         
@@ -23,7 +22,7 @@ class Mob(Entity):
     power = 0
 
     def __init__(self, id, level, x, y):
-        super().__init__(id, level)
+        super().__init__(id)
         self.power=random.randint(level,level+2)
         self.hp=random.randint(level,level+1)
         self.location = [x, y]
@@ -37,6 +36,6 @@ class Player(Entity):
     inventory = ['','','',
                 '','','']
 
-    def __init__(self, id, level, location):
-        super().__init__(id, level)
+    def __init__(self, id, location):
+        super().__init__(id)
         self.location = location

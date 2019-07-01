@@ -26,13 +26,19 @@ class Map(object):
     mobs = []
     def __init__(self,level):
         self.maps = [['1' for i in range(0, self.length)] for j in range(0, self.length)]
+
+        self.center = []
+        self.chests = []
+        self.mobs = []
+        self.rooms = []
+
         countofrooms = random.randint(3,7)
         self.generateroom(countofrooms, True)
         countofchests = random.randint(2, 4)
         self.setChests(countofchests, 1)
         self.setLadder()
         countofmobs = random.randint(level, level+5)
-        self.setMobs(countofmobs, 1)
+        self.setMobs(countofmobs, level)
 
     def cleanUp(self):
         self.maps = [['1' for i in range(0, self.length)] for j in range(0, self.length)]
@@ -107,7 +113,7 @@ class Map(object):
                 if flag:
                     continue
                 else:
-                    self.chests.append(entities.Chest(i, level, x, y))
+                    self.chests.append(entities.Chest(i, x, y))
                     self.maps[x][y] = '5'
                     c += 1
             else:
@@ -183,24 +189,24 @@ class Map(object):
                 dj = []
                 if diffI < 0 and diffJ < 0:  # в зависимости от разницы составляются "векторы" направления моба
                     di = [-1, -2]
-                    dj = [-1,-2]
+                    dj = [-0,-0]
                 elif diffI > 0 and diffJ < 0:
-                    di = [1,2]
+                    di = [0,0]
                     dj = [-1, -2]
                 elif diffI < 0 and diffJ > 0:
                     di = [-1, -2]
-                    dj = [1,2]
+                    dj = [0,0]
                 elif diffI > 0 and diffJ > 0:
-                    di = [1, 2]
+                    di = [0, 0]
                     dj = [1,2]
                 elif diffI == 0 and diffJ <= 0:
                     di = [0, 0]
-                    dj = [-1, -2]
+                    dj = [-1, -0]
                 elif diffI == 0 and diffJ >= 0:
                     di = [0, 0]
-                    dj = [1, 2]
+                    dj = [1, 0]
                 elif diffI <= 0 and diffJ == 0:
-                    di = [-1, -2]
+                    di = [-1, -0]
                     dj = [0, 0]
                 elif diffI >= 0 and diffJ == 0:
                     di = [1, 2]
