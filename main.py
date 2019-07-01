@@ -6,7 +6,7 @@ import entities
 import render
 import time
 
-version = 'alpha 1.1.4'
+version = 'alpha 1.1.5'
 
 
 class Game(object):
@@ -16,7 +16,7 @@ class Game(object):
 
     def __init__(self, level):
         self.level = level
-        self.__FPS = 15
+        self.__FPS = 20
         self.__STEP = 16
         self.__WINDOW_HEIGHT = 960
         self.__WINDOW_WEIGHT = 800
@@ -348,7 +348,7 @@ while True:
         if i.type == pygame.QUIT:
             exit()
         elif i.type == pygame.KEYDOWN:
-            game.printLog()
+            #game.printLog()
             # if i.key == pygame.K_UP:
             #     game.movePlayer(-1, 0)
             #     move_key = True
@@ -376,7 +376,7 @@ while True:
             elif i.key==pygame.K_e:
                 game.inv_mode()
                 
-    if mob_clk==int(fps/2):
+    if mob_clk==int(fps/3):
         game.moveMobs()
         mob_clk=0
     else:

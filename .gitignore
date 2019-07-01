@@ -2,3 +2,6 @@ venv/*
 __pycache__/*
 .idea/*
 .vscode/*
+build_windows/*
+build_windows*
+setup*
