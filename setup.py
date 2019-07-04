@@ -9,7 +9,7 @@ excludes = ['logging', 'unittest', 'email', 'html', 'http', 'urllib',
 
 includes = ['pygame']
 
-include_files = ['src']
+include_files = ['src','stats.db']
 
 options = {
     'build_exe': {

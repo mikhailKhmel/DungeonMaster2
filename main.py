@@ -1,25 +1,39 @@
-import pygame
-import genmaps
 import random
 import math
+import time
+import sqlite3
+
+import pygame
+
+import genmaps
 import entities
 import render
-import time
 
-version = 'alpha 1.1.5'
+
+VERSION = 'alpha 1.2'
+
+conn = sqlite3.connect('stats.db')
+cursor = conn.cursor()
+
 
 
 class Game(object):
     level = 1
     sector = genmaps.Map(level=level)
     player = entities.Player(id=0, location=sector.setPlayer())
-
+    username = ''
     def __init__(self, level):
         self.level = level
         self.__FPS = 20
         self.__STEP = 16
         self.__WINDOW_HEIGHT = 960
         self.__WINDOW_WEIGHT = 800
+
+        # if not cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users';"):
+        #     sql = """ 
+        #     CREATE TABLE users (username text, highest_level integer)
+        #     """
+        #     cursor.execute(sql)
 
     @property
     def getFps(self):
@@ -96,22 +110,6 @@ class Game(object):
         elif self.sector.maps[current_locationI][current_locationJ - 1] == '3':
             self.__searchMob(0, -1)
 
-    def renderMenu(self, sc, pos, InProccess):
-        #sc.fill((0, 0, 0))
-        f = pygame.font.Font('src/Minecraftia.ttf', 48)
-        if InProccess:
-            menu = ['return', 'restart', 'exit']
-        else:
-            menu = ['start', 'exit']
-        y = 72
-        for i in range(0, len(menu)):
-            if i == pos:
-                t = f.render(menu[i], 0, (255, 255, 0))
-            else:
-                t = f.render(menu[i], 0, (255, 255, 255))
-            sc.blit(t, (0, y))
-            y += 72
-        return menu
 
     def inv_mode(self):
         mode = True
@@ -166,7 +164,179 @@ class Game(object):
                                 self.player.inventory[pos] = ''
 
 
-    def menu(self, InProccess, sc):
+    def enter_name(self,sc):
+        size = 16
+        name = []
+        curr_index = 0
+        
+        while True:
+            pygame.display.update()
+            clock.tick(self.getFps)
+
+            if len(name)>=24:
+                continue
+
+            f = pygame.font.Font('src/Minecraftia.ttf', size)
+
+            t = f.render('Enter your name', 0, (255,255,255))
+            sc.blit(t,(0,0))
+            x=0
+            for i in name:
+                t = f.render(i,0,(255,255,255))
+                x+=size
+                sc.blit(t,(x,size*3))
+            pass
+            
+            for e in pygame.event.get():
+                if e.type == pygame.KEYDOWN:
+                    if e.key == pygame.K_BACKSPACE:
+                        curr_index -= 1
+                        del name[curr_index]
+                        sc.fill((0,0,0))
+                        break
+                    elif e.key == pygame.K_a: 
+                        name += 'a'
+                    elif e.key == pygame.K_b: 
+                        name += 'b'
+                    elif e.key == pygame.K_c: 
+                        name += 'c'
+                    elif e.key == pygame.K_d: 
+                        name += 'd'
+                    elif e.key == pygame.K_e: 
+                        name += 'e'
+                    elif e.key == pygame.K_f: 
+                        name += 'f'
+                    elif e.key == pygame.K_g: 
+                        name += 'g'
+                    elif e.key == pygame.K_h: 
+                        name += 'h'
+                    elif e.key == pygame.K_i: 
+                        name += 'i'
+                    elif e.key == pygame.K_j: 
+                        name += 'j'
+                    elif e.key == pygame.K_k: 
+                        name += 'k'
+                    elif e.key == pygame.K_l: 
+                        name += 'l'
+                    elif e.key == pygame.K_m: 
+                        name += 'm'
+                    elif e.key == pygame.K_n: 
+                        name += 'n'
+                    elif e.key == pygame.K_o: 
+                        name += 'o'
+                    elif e.key == pygame.K_p: 
+                        name += 'p'
+                    elif e.key == pygame.K_q: 
+                        name += 'q'
+                    elif e.key == pygame.K_r: 
+                        name += 'r'
+                    elif e.key == pygame.K_s: 
+                        name += 's'
+                    elif e.key == pygame.K_t: 
+                        name += 's'
+                    elif e.key == pygame.K_u: 
+                        name += 'u'
+                    elif e.key == pygame.K_v: 
+                        name += 'v'
+                    elif e.key == pygame.K_w: 
+                        name += 'w'
+                    elif e.key == pygame.K_x: 
+                        name += 'x'
+                    elif e.key == pygame.K_y: 
+                        name += 'y'
+                    elif e.key == pygame.K_z: 
+                        name += 'z'
+
+                    elif e.key == pygame.K_0: 
+                        name += '0'
+                    elif e.key == pygame.K_1: 
+                        name += '1'
+                    elif e.key == pygame.K_2: 
+                        name += '2'
+                    elif e.key == pygame.K_3: 
+                        name += '3'
+                    elif e.key == pygame.K_4: 
+                        name += '4'
+                    elif e.key == pygame.K_5: 
+                        name += '5'
+                    elif e.key == pygame.K_6: 
+                        name += '6'
+                    elif e.key == pygame.K_7: 
+                        name += '7'
+                    elif e.key == pygame.K_8: 
+                        name += '8'
+                    elif e.key == pygame.K_9: 
+                        name += '9'
+                             
+                    elif e.key == pygame.K_RETURN:
+                        sql = "select username from users where username='" + ''.join(name) + "'"
+                        if cursor.execute(sql):
+                            tmp_username = cursor.fetchone()
+                            if tmp_username != None:
+                                self.username = ''.join(name)
+                            else:
+                                sql = 'insert into users (username, highest_level) values ("'+''.join(name)+'", 0)'
+                                cursor.execute(sql)
+                                conn.commit()
+                                self.username = ''.join(name)
+                        sc.fill((0,0,0))
+                        return
+                   # sc.fill((0,0,0))
+                    curr_index += 1
+                    
+    def renderMenu(self, sc, pos, InProccess):
+        #sc.fill((0, 0, 0))
+        f = pygame.font.Font('src/Minecraftia.ttf', 48)
+        if InProccess:
+            menu = ['return', 'restart', 'exit']
+            y = 80
+        else:
+            menu = ['start','stats', 'exit']
+            y = 180
+        for i in range(0, len(menu)):
+            if i == pos:
+                t = f.render(menu[i], 0, (255, 255, 0))
+            else:
+                t = f.render(menu[i], 0, (255, 255, 255))
+            sc.blit(t, (0, y))
+            y += 72
+        return menu
+
+    def show_stats(self):
+        sc.fill((0,0,0))
+        while True:
+            
+            pygame.display.update()
+            clock.tick(self.getFps)
+
+            sql = 'select * from users'
+            result = cursor.execute(sql)
+            
+            f = pygame.font.Font('src/Minecraftia.ttf', 48)
+            t = f.render('username      highest_level',0,(255,255,255))
+            sc.blit(t,(0,0))
+            c=1
+            for row in result:
+                t = f.render(str(row[0]), 0, (255,255,255))
+                sc.blit(t,(0,48*c))
+                t = f.render(str(row[1]), 0, (255,255,255))
+                sc.blit(t,(48*10,48*c))
+                c+=1
+            c+=1
+            t = f.render('BACK',0,(255,255,0))
+            sc.blit(t,(0,48*c))
+            for e in pygame.event.get():
+                if e.type == pygame.KEYDOWN:
+                    if e.key == pygame.K_RETURN:
+                        return
+            
+
+
+    def menu(self, InProccess, sc, firstStart):
+        
+        if firstStart:
+            self.enter_name(sc)
+
         menu = True
         pos = 0
         while menu:
@@ -200,6 +370,9 @@ class Game(object):
                         elif list_menu[pos] == 'restart':
                             self.restartLevel(True)
                             menu = False
+                        elif list_menu[pos] == 'stats':
+                            self.show_stats()
+                            sc.fill((0,0,0))
                         elif list_menu[pos] == 'exit':
                             quit()
     
@@ -292,7 +465,7 @@ sc.blit(lightZone, (0, 0))
 clock = pygame.time.Clock()
 ###########
 
-game.menu(False,sc)
+game.menu(False,sc, True)
 
 game.renderView(god_mode)
 
@@ -307,6 +480,14 @@ while True:
     game.renderView(god_mode)
     move_key = False
     if game.player.hp <= 0:
+        sql = 'select highest_level from users where username="'+str(game.username)+'"'
+        cursor.execute(sql)
+        result = cursor.fetchone()
+        if int(result[0])<game.level:
+            sql = 'update users set highest_level='+str(game.level)+' where username="'+str(game.username)+'"'
+            cursor.execute(sql)
+            conn.commit()
+
         sc.fill((255, 0, 0))
         f = pygame.font.Font('src/Minecraftia.ttf', 48)
         gameover_text = f.render("GAME OVER", 0, (0, 0, 0))
@@ -315,7 +496,7 @@ while True:
         time.sleep(2)
         game.level=1
         game.restartLevel(True)
-        game.menu(False,sc)
+        game.menu(False,sc, False)
     
     keys = pygame.key.get_pressed()
     delay = 2
@@ -348,19 +529,7 @@ while True:
         if i.type == pygame.QUIT:
             exit()
         elif i.type == pygame.KEYDOWN:
-            game.printLog()
-            # if i.key == pygame.K_UP:
-            #     game.movePlayer(-1, 0)
-            #     move_key = True
-            # elif i.key == pygame.K_DOWN:
-            #     game.movePlayer(1, 0)
-            #     move_key = True
-            # elif i.key == pygame.K_LEFT:
-            #     game.movePlayer(0, -1)
-            #     move_key = True
-            # elif i.key == pygame.K_RIGHT:
-            #     game.movePlayer(0, 1)
-            #     move_key = True
+           #game.printLog()
             if i.key == pygame.K_SPACE:
                 game.playerAttackMob()
                 move_key = True
@@ -372,7 +541,7 @@ while True:
             elif i.key == pygame.K_r:
                 game.openChest()
             elif i.key==pygame.K_ESCAPE:
-                game.menu(True,sc)
+                game.menu(True,sc, False)
             elif i.key==pygame.K_e:
                 game.inv_mode()
                 
