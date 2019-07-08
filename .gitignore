@@ -5,3 +5,4 @@ __pycache__/*
 build_windows/*
 build_windows*
 setup*
+stats*

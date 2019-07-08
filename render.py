@@ -285,7 +285,7 @@ def renderInfoAboutPlayer(sc,player,lvl,countofmobs):
     sc.blit(info_sc, (800,0))
     return
 
-def renderGame(sc, sector, god_mode, player, lvl, countofmobs):
+def renderGame(sc, sector, god_mode, player, lvl, countofmobs, first_start):
     if god_mode:
         x = 0
         y = 0
@@ -296,26 +296,32 @@ def renderGame(sc, sector, god_mode, player, lvl, countofmobs):
             x = 0
             y += STEP
         return
-    x = 0
-    y = 0
+
+    
+    x = player.view_location[0]
+    y = player.view_location[1]
     sc.fill((0, 0, 0))
     for i in range(0, len(sector)):
         for j in range(0, len(sector[i])):
             if sector[i][j] == '2':
-                # print('x=', x, '\ty=', y)
-                renderLightZone(sc, sector, x, y, i, j)
-            # else:
-            #     blitImg(sc, sector[i][j], x, y)
-            x += STEP
-        x = 0
-        y += STEP
+                if player.view_location[0]<3*STEP:
+                    player.view_location[0]+=STEP
+                elif player.view_location[0]>22*STEP:
+                    player.view_location[0]-=STEP
+                elif player.view_location[1]<3*STEP:
+                    player.view_location[1]+=STEP
+                elif player.view_location[1]>22*STEP:
+                    player.view_location[1]-=STEP
+                renderLightZone(sc, sector, player.view_location[0], player.view_location[1], i, j)
+
+        
     renderInfoAboutPlayer(sc,player,lvl,countofmobs)
     renderInv(sc, player, False, -1)
 
 
 def attackMob(sc, location):
-    x = location[1] * STEP
-    y = location[0] * STEP
+    x = location[1]
+    y = location[0]
     img = pygame.image.load(RED)
     img_rect = img.get_rect(topleft=(x, y))
     sc.blit(img, img_rect)

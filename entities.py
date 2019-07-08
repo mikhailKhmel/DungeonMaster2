@@ -35,7 +35,8 @@ class Player(Entity):
     power = 1
     inventory = ['','','',
                 '','','']
-
-    def __init__(self, id, location):
+    view_location = []
+    def __init__(self, id, location, view_location):
         super().__init__(id)
         self.location = location
+        self.view_location = view_location

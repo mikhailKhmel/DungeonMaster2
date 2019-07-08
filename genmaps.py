@@ -18,7 +18,7 @@ class Room():
         self.y2 = y2
 
 class Map(object):
-    length = 25
+    length = 50
     maps = []
     center = []
     rooms = []
@@ -32,12 +32,12 @@ class Map(object):
         self.mobs = []
         self.rooms = []
 
-        countofrooms = random.randint(3,7)
+        countofrooms = random.randint(10,15)
         self.generateroom(countofrooms, True)
-        countofchests = random.randint(2, 4)
+        countofchests = random.randint(5, 10)
         self.setChests(countofchests, 1)
         self.setLadder()
-        countofmobs = random.randint(level, level+5)
+        countofmobs = random.randint(countofrooms, countofrooms+5)
         self.setMobs(countofmobs, level)
 
     def cleanUp(self):
@@ -181,7 +181,7 @@ class Map(object):
                 cur_j] == '2' or self.maps[cur_i][cur_j - 1] == '2':
                 minus_hp = mob.power - player.armor_lvl
                 player.hp -= abs(minus_hp)
-                render.attackMob(sc, player.location)
+                render.attackMob(sc, player.view_location)
             else:
                 diffI = player.location[0] - cur_i
                 diffJ = player.location[1] - cur_j
@@ -254,5 +254,9 @@ class Map(object):
             self.maps[player.location[0]][player.location[1]] = '0'
             player.location[0] += dx
             player.location[1] += dy
+
+            player.view_location[1] += dx*32
+            player.view_location[0] += dy*32
+
             self.maps[player.location[0]][player.location[1]] = '2'
             return player.location

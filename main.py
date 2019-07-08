@@ -10,7 +10,7 @@ import entities
 import render
 
 
-VERSION = 'alpha 1.2'
+VERSION = 'alpha 1.3'
 
 conn = sqlite3.connect('stats.db')
 cursor = conn.cursor()
@@ -20,7 +20,7 @@ cursor = conn.cursor()
 class Game(object):
     level = 1
     sector = genmaps.Map(level=level)
-    player = entities.Player(id=0, location=sector.setPlayer())
+    player = entities.Player(id=0, location=sector.setPlayer(), view_location=[32*5,32*5])
     username = ''
     def __init__(self, level):
         self.level = level
@@ -47,8 +47,8 @@ class Game(object):
     def getWindow(self):
         return self.__WINDOW_HEIGHT, self.__WINDOW_WEIGHT
 
-    def renderView(self, god_mode):
-        render.renderGame(sc, self.sector.maps, god_mode, self.player, self.level, len(self.sector.mobs))
+    def renderView(self, god_mode, first_start):
+        render.renderGame(sc, self.sector.maps, god_mode, self.player, self.level, len(self.sector.mobs), first_start)
 
     def initPlayer(self):
         self.player.hp = 10
@@ -58,6 +58,7 @@ class Game(object):
         self.player.power=1
         self.player.inventory=['','','','','','']
         self.player.location=self.sector.setPlayer()
+        self.player.view_location=[32*5,32*5]
 
     def restartLevel(self, new_player):
         sc.fill((0,0,0))
@@ -89,14 +90,14 @@ class Game(object):
         for i in range(0, len(tmp)):
             if tmp[i].location == [self.player.location[0] + di, self.player.location[1] + dj]:
                 tmp[i].hp = tmp[i].hp - self.player.power
-                render.attackMob(sc, tmp[i].location)
+                render.attackMob(sc, [self.player.view_location[1] + di*32, self.player.view_location[0] + dj*32])
                 if tmp[i].hp <= 0:
                     tmp.remove(tmp[i])
                     self.sector.maps[self.player.location[0] +
                                      di][self.player.location[1] + dj] = '0'
                 self.sector.mobs = tmp
-                return True
-        return False
+                return
+                
 
     def playerAttackMob(self):
         current_locationI = self.player.location[0]
@@ -267,7 +268,25 @@ class Game(object):
                         name += '8'
                     elif e.key == pygame.K_9: 
                         name += '9'
-                             
+                    
+                    elif e.key == pygame.K_SLASH:
+                        name+='/'
+                    elif e.key == pygame.K_EXCLAIM:
+                        name+='!'
+                    elif e.key == pygame.K_QUOTEDBL:
+                        name+='"'
+                    elif e.key == pygame.K_HASH:
+                        name+='#'
+                    elif e.key == pygame.K_DOLLAR:
+                        name+='$'
+                    elif e.key == pygame.K_AMPERSAND:
+                        name+='&'
+                    elif e.key == pygame.K_LEFTPAREN:
+                        name+='('
+                    elif e.key == pygame.K_RIGHTPAREN:
+                        name+=')'
+
+
                     elif e.key == pygame.K_RETURN:
                         sql = "select username from users where username='" + ''.join(name) + "'"
                         if cursor.execute(sql):
@@ -315,7 +334,9 @@ class Game(object):
             f = pygame.font.Font('src/Minecraftia.ttf', 48)
             t = f.render('username      highest_level',0,(255,255,255))
             sc.blit(t,(0,0))
-            c=1
+            t = f.render('==========================',0,(255,255,255))
+            sc.blit(t,(0,48))
+            c=2
             for row in result:
                 t = f.render(str(row[0]), 0, (255,255,255))
                 sc.blit(t,(0,48*c))
@@ -467,7 +488,7 @@ clock = pygame.time.Clock()
 
 game.menu(False,sc, True)
 
-game.renderView(god_mode)
+game.renderView(god_mode, True)
 
 ###########
 pygame.display.update()
@@ -477,7 +498,7 @@ while True:
     fps=game.getFps
     clock.tick(fps)
     pygame.display.update()
-    game.renderView(god_mode)
+    game.renderView(god_mode, False)
     move_key = False
     if game.player.hp <= 0:
         sql = 'select highest_level from users where username="'+str(game.username)+'"'
@@ -491,7 +512,7 @@ while True:
         sc.fill((255, 0, 0))
         f = pygame.font.Font('src/Minecraftia.ttf', 48)
         gameover_text = f.render("GAME OVER", 0, (0, 0, 0))
-        sc.blit(gameover_text, (500, 500))
+        sc.blit(gameover_text, (250, 250))
         pygame.display.update()
         time.sleep(2)
         game.level=1
