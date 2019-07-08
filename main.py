@@ -10,7 +10,7 @@ import entities
 import render
 
 
-VERSION = 'alpha 1.3'
+VERSION = 'alpha 1.3.1'
 
 conn = sqlite3.connect('stats.db')
 cursor = conn.cursor()
@@ -20,20 +20,36 @@ cursor = conn.cursor()
 class Game(object):
     level = 1
     sector = genmaps.Map(level=level)
+    sector_view = [[]]
     player = entities.Player(id=0, location=sector.setPlayer(), view_location=[32*5,32*5])
     username = ''
+
     def __init__(self, level):
         self.level = level
         self.__FPS = 20
         self.__STEP = 16
         self.__WINDOW_HEIGHT = 960
         self.__WINDOW_WEIGHT = 800
+        self.sector_view_append()
 
-        # if not cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users';"):
-        #     sql = """ 
-        #     CREATE TABLE users (username text, highest_level integer)
-        #     """
-        #     cursor.execute(sql)
+    def sector_view_append(self):
+        self.sector_view = [[]]
+        for i in range(0,len(self.sector.maps)):
+            for j in range(0,len(self.sector.maps[i])):
+                if self.sector.maps[i][j] == '0':
+                    self.sector_view[i].append(render.LIGHT_GROUND)
+                elif self.sector.maps[i][j] == '1':
+                    self.sector_view[i].append(random.choice([render.LIGHT_WALL,render.LIGHT_WALL1]))
+                elif self.sector.maps[i][j] == '2':
+                    self.sector_view[i].append(render.PLAYER)
+                elif self.sector.maps[i][j] == '3':
+                    self.sector_view[i].append(render.MOB)
+                elif self.sector.maps[i][j] == '4':
+                    self.sector_view[i].append(render.LADDER)
+                elif self.sector.maps[i][j] == '5':
+                    self.sector_view[i].append(render.CHEST)
+            self.sector_view.append([])
+
 
     @property
     def getFps(self):
@@ -47,8 +63,8 @@ class Game(object):
     def getWindow(self):
         return self.__WINDOW_HEIGHT, self.__WINDOW_WEIGHT
 
-    def renderView(self, god_mode, first_start):
-        render.renderGame(sc, self.sector.maps, god_mode, self.player, self.level, len(self.sector.mobs), first_start)
+    def renderView(self, god_mode):
+        render.renderGame(sc, self.sector.maps, god_mode, self.player, self.level, len(self.sector.mobs), self.sector_view)
 
     def initPlayer(self):
         self.player.hp = 10
@@ -63,6 +79,7 @@ class Game(object):
     def restartLevel(self, new_player):
         sc.fill((0,0,0))
         self.sector.__init__(level=self.level)
+        self.sector_view_append()
         if new_player:
             self.initPlayer()
         else:
@@ -488,7 +505,7 @@ clock = pygame.time.Clock()
 
 game.menu(False,sc, True)
 
-game.renderView(god_mode, True)
+game.renderView(god_mode)
 
 ###########
 pygame.display.update()
@@ -498,7 +515,7 @@ while True:
     fps=game.getFps
     clock.tick(fps)
     pygame.display.update()
-    game.renderView(god_mode, False)
+    game.renderView(god_mode)
     move_key = False
     if game.player.hp <= 0:
         sql = 'select highest_level from users where username="'+str(game.username)+'"'

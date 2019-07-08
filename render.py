@@ -23,6 +23,7 @@ YELLOW = (225, 225, 0)
 PINK = (230, 50, 230)
 
 LIGHT_WALL = 'src/env/light/new_wall.bmp'
+LIGHT_WALL1 = 'src/env/light/new_wall1.bmp'
 LIGHT_GROUND = 'src/env/light/new_plitka.bmp'
 DARK_WALL = 'src/env/dark/wall.bmp'
 DARK_GROUND = 'src/env/dark/plitka1.bmp'
@@ -52,13 +53,13 @@ DISK_LVL5 = 'src/inv/disk_lvl5.png'
 POTION = 'src/inv/potion.png'
 
 
-def blitImg(sc, tpe, dx, dy):
+def blitImg(sc, tpe, dx, dy, tpe_view):
     if tpe == '0':
         img = pygame.image.load(LIGHT_GROUND)
         img_rect = img.get_rect(topleft=(dx, dy))
         sc.blit(img, img_rect)
     elif tpe == '1':
-        img = pygame.image.load(LIGHT_WALL)
+        img = pygame.image.load(tpe_view)
         img_rect = img.get_rect(topleft=(dx, dy))
         sc.blit(img, img_rect)
     elif tpe == '2':
@@ -79,7 +80,7 @@ def blitImg(sc, tpe, dx, dy):
         sc.blit(img, img_rect)
 
 
-def renderLightZone(sc, sector, x, y, i, j):
+def renderLightZone(sc, sector, x, y, i, j, sector_view):
     startI = i - 2
     endI = startI + 5
     startJ = j - 2
@@ -104,52 +105,52 @@ def renderLightZone(sc, sector, x, y, i, j):
                     if sector[i + 1][j] == '1':
                         pygame.draw.rect(sc, (0, 0, 0), (x, y, x + STEP, y + STEP))
                     else:
-                        blitImg(sc, sector[i][j], x, y)
+                        blitImg(sc, sector[i][j], x, y, sector_view[i][j])
 
                 if c in sector2:
                     if sector[i][j + 1] == '1':
                         pygame.draw.rect(sc, (0, 0, 0), (x, y, x + STEP, y + STEP))
                     else:
-                        blitImg(sc, sector[i][j], x, y)
+                        blitImg(sc, sector[i][j], x, y, sector_view[i][j])
 
                 if c in sector3:
                     if sector[i][j - 1] == '1':
                         pygame.draw.rect(sc, (0, 0, 0), (x, y, x + STEP, y + STEP))
                     else:
-                        blitImg(sc, sector[i][j], x, y)
+                        blitImg(sc, sector[i][j], x, y, sector_view[i][j])
 
                 if c in sector4:
                     if sector[i - 1][j] == '1':
                         pygame.draw.rect(sc, (0, 0, 0), (x, y, x + STEP, y + STEP))
                     else:
-                        blitImg(sc, sector[i][j], x, y)
+                        blitImg(sc, sector[i][j], x, y, sector_view[i][j])
 
                 if c in sector5:
                     if c == 0:
                         if sector[i + 1][j + 1] == '1':
                             pygame.draw.rect(sc, (0, 0, 0), (x, y, x + STEP, y + STEP))
                         else:
-                            blitImg(sc, sector[i][j], x, y)
+                            blitImg(sc, sector[i][j], x, y, sector_view[i][j])
 
                     if c == 4:
                         if sector[i + 1][j - 1] == '1':
                             pygame.draw.rect(sc, (0, 0, 0), (x, y, x + STEP, y + STEP))
                         else:
-                            blitImg(sc, sector[i][j], x, y)
+                            blitImg(sc, sector[i][j], x, y, sector_view[i][j])
 
                     if c == 20:
                         if sector[i - 1][j + 1] == '1':
                             pygame.draw.rect(sc, (0, 0, 0), (x, y, x + STEP, y + STEP))
                         else:
-                            blitImg(sc, sector[i][j], x, y)
+                            blitImg(sc, sector[i][j], x, y, sector_view[i][j])
 
                     if c == 24:
                         if sector[i - 1][j - 1] == '1':
                             pygame.draw.rect(sc, (0, 0, 0), (x, y, x + STEP, y + STEP))
                         else:
-                            blitImg(sc, sector[i][j], x, y)
+                            blitImg(sc, sector[i][j], x, y, sector_view[i][j])
             else:
-                blitImg(sc, sector[i][j], x, y)
+                blitImg(sc, sector[i][j], x, y, sector_view[i][j])
             c += 1
             x += STEP
         x = startX
@@ -285,13 +286,13 @@ def renderInfoAboutPlayer(sc,player,lvl,countofmobs):
     sc.blit(info_sc, (800,0))
     return
 
-def renderGame(sc, sector, god_mode, player, lvl, countofmobs, first_start):
+def renderGame(sc, sector, god_mode, player, lvl, countofmobs, sector_view):
     if god_mode:
         x = 0
         y = 0
         for i in range(0, len(sector)):
             for j in range(0, len(sector[i])):
-                blitImg(sc, sector[i][j], x, y)
+                blitImg(sc, sector[i][j], x, y, sector_view[i][j])
                 x += STEP
             x = 0
             y += STEP
@@ -312,7 +313,7 @@ def renderGame(sc, sector, god_mode, player, lvl, countofmobs, first_start):
                     player.view_location[1]+=STEP
                 elif player.view_location[1]>22*STEP:
                     player.view_location[1]-=STEP
-                renderLightZone(sc, sector, player.view_location[0], player.view_location[1], i, j)
+                renderLightZone(sc, sector, player.view_location[0], player.view_location[1], i, j, sector_view)
 
         
     renderInfoAboutPlayer(sc,player,lvl,countofmobs)
