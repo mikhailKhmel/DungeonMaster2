@@ -1,11 +1,11 @@
 import random
-import time
 import sqlite3
+import time
 
 import pygame
 
-import genmaps
 import entities
+import genmaps
 import render
 
 VERSION = 'alpha 1.4'
@@ -158,7 +158,7 @@ class Game(object):
                             flag = True
             else:
                 mouse_pos = pygame.mouse.get_pos()
-                print(mouse_pos)
+                # print(mouse_pos)
                 if mouse_pos[0] >= 800 and mouse_pos[0] <= 853 and mouse_pos[1] >= 226 and mouse_pos[1] <= 279:
                     pos = 0
                 elif mouse_pos[0] >= 854 and mouse_pos[0] <= 908 and mouse_pos[1] >= 226 and mouse_pos[1] <= 279:
@@ -442,7 +442,7 @@ class Game(object):
                         curr_pos = 1
 
                     if pressed[0]:
-                        print(pos)
+                        #print(pos)
                         if pos[0] <= 150 and pos[0] >= 0 and pos[1] >= 66 and pos[1] <= 107:
                             self.control_mode = 0
                             sc.fill((0, 0, 0))
@@ -516,7 +516,7 @@ class Game(object):
                                 quit()
                 else:
                     mouse_pos = pygame.mouse.get_pos()
-                    print(mouse_pos)
+                    #print(mouse_pos)
 
                     if mouse_pos[0] >= 0 and mouse_pos[0] <= 153 and mouse_pos[1] >= 198 and mouse_pos[1] <= 242:
                         pos = 0
@@ -603,7 +603,7 @@ class Game(object):
 
     def check_mouse_pos(self, pos):
         # print(pos)
-        print(self.player.view_location)
+        #print(self.player.view_location)
         pl = self.player.view_location
         up_sprite = ((self.player.view_location[0], self.player.view_location[1] - 32),
                      (self.player.view_location[0] + 32, self.player.view_location[1] - 1))
