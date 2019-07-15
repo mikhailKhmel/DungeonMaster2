@@ -1,5 +1,5 @@
 import pygame
-
+import random
 
 STEP = 32
 WINDOW_HEIGHT = 1024
@@ -23,6 +23,7 @@ YELLOW = (225, 225, 0)
 PINK = (230, 50, 230)
 
 LIGHT_WALL = 'src/env/light/new_wall.bmp'
+LIGHT_WALL1 = 'src/env/light/new_wall1.bmp'
 LIGHT_GROUND = 'src/env/light/new_plitka.bmp'
 DARK_WALL = 'src/env/dark/wall.bmp'
 DARK_GROUND = 'src/env/dark/plitka1.bmp'
@@ -52,13 +53,13 @@ DISK_LVL5 = 'src/inv/disk_lvl5.png'
 POTION = 'src/inv/potion.png'
 
 
-def blitImg(sc, tpe, dx, dy):
+def blitImg(sc, tpe, dx, dy, tpe_view):
     if tpe == '0':
         img = pygame.image.load(LIGHT_GROUND)
         img_rect = img.get_rect(topleft=(dx, dy))
         sc.blit(img, img_rect)
     elif tpe == '1':
-        img = pygame.image.load(LIGHT_WALL)
+        img = pygame.image.load(tpe_view)
         img_rect = img.get_rect(topleft=(dx, dy))
         sc.blit(img, img_rect)
     elif tpe == '2':
@@ -79,7 +80,7 @@ def blitImg(sc, tpe, dx, dy):
         sc.blit(img, img_rect)
 
 
-def renderLightZone(sc, sector, x, y, i, j):
+def renderLightZone(sc, sector, x, y, i, j, sector_view):
     startI = i - 2
     endI = startI + 5
     startJ = j - 2
@@ -87,7 +88,7 @@ def renderLightZone(sc, sector, x, y, i, j):
 
     startX = x - STEP * 2
     startY = y - STEP * 2
-    
+
     x = startX
     y = startY
 
@@ -104,246 +105,223 @@ def renderLightZone(sc, sector, x, y, i, j):
                     if sector[i + 1][j] == '1':
                         pygame.draw.rect(sc, (0, 0, 0), (x, y, x + STEP, y + STEP))
                     else:
-                        blitImg(sc, sector[i][j], x, y)
+                        blitImg(sc, sector[i][j], x, y, sector_view[i][j])
 
                 if c in sector2:
                     if sector[i][j + 1] == '1':
                         pygame.draw.rect(sc, (0, 0, 0), (x, y, x + STEP, y + STEP))
                     else:
-                        blitImg(sc, sector[i][j], x, y)
+                        blitImg(sc, sector[i][j], x, y, sector_view[i][j])
 
                 if c in sector3:
                     if sector[i][j - 1] == '1':
                         pygame.draw.rect(sc, (0, 0, 0), (x, y, x + STEP, y + STEP))
                     else:
-                        blitImg(sc, sector[i][j], x, y)
+                        blitImg(sc, sector[i][j], x, y, sector_view[i][j])
 
                 if c in sector4:
                     if sector[i - 1][j] == '1':
                         pygame.draw.rect(sc, (0, 0, 0), (x, y, x + STEP, y + STEP))
                     else:
-                        blitImg(sc, sector[i][j], x, y)
+                        blitImg(sc, sector[i][j], x, y, sector_view[i][j])
 
                 if c in sector5:
                     if c == 0:
                         if sector[i + 1][j + 1] == '1':
                             pygame.draw.rect(sc, (0, 0, 0), (x, y, x + STEP, y + STEP))
                         else:
-                            blitImg(sc, sector[i][j], x, y)
+                            blitImg(sc, sector[i][j], x, y, sector_view[i][j])
 
                     if c == 4:
                         if sector[i + 1][j - 1] == '1':
                             pygame.draw.rect(sc, (0, 0, 0), (x, y, x + STEP, y + STEP))
                         else:
-                            blitImg(sc, sector[i][j], x, y)
+                            blitImg(sc, sector[i][j], x, y, sector_view[i][j])
 
                     if c == 20:
                         if sector[i - 1][j + 1] == '1':
                             pygame.draw.rect(sc, (0, 0, 0), (x, y, x + STEP, y + STEP))
                         else:
-                            blitImg(sc, sector[i][j], x, y)
+                            blitImg(sc, sector[i][j], x, y, sector_view[i][j])
 
                     if c == 24:
                         if sector[i - 1][j - 1] == '1':
                             pygame.draw.rect(sc, (0, 0, 0), (x, y, x + STEP, y + STEP))
                         else:
-                            blitImg(sc, sector[i][j], x, y)
+                            blitImg(sc, sector[i][j], x, y, sector_view[i][j])
             else:
-                blitImg(sc, sector[i][j], x, y)
+                blitImg(sc, sector[i][j], x, y, sector_view[i][j])
             c += 1
             x += STEP
         x = startX
         y += STEP
 
-def renderOnlyInv(inv_sc,player):
-    x=0
-    y=0
-    c=0
+
+def renderOnlyInv(inv_sc, player):
+    x = 0
+    y = 0
+    c = 0
     for item in player.inventory:
         if item == '':
             img = pygame.image.load(EMPTY_SLOT)
             img_rect = img.get_rect(topleft=(x, y))
             inv_sc.blit(img, img_rect)
-            x+=54
+            x += 54
         elif item == 'potion':
             img = pygame.image.load(POTION)
             img_rect = img.get_rect(topleft=(x, y))
             inv_sc.blit(img, img_rect)
-            x+=54
-        elif item == 'disk_lvl1':
-            img = pygame.image.load(DISK_LVL1)
+            x += 54
+        elif item[:len(item) - 1] == 'disk_lvl':
+            img = pygame.image.load('src/inv/disk_lvl' + str(random.randint(1, 5)) + '.png')
             img_rect = img.get_rect(topleft=(x, y))
             inv_sc.blit(img, img_rect)
-            x+=54
-        elif item == 'disk_lvl2':
-            img = pygame.image.load(DISK_LVL2)
-            img_rect = img.get_rect(topleft=(x, y))
-            inv_sc.blit(img, img_rect)
-            x+=54
-        elif item == 'disk_lvl3':
-            img = pygame.image.load(DISK_LVL3)
-            img_rect = img.get_rect(topleft=(x, y))
-            inv_sc.blit(img, img_rect)
-            x+=54
-        elif item == 'disk_lvl4':
-            img = pygame.image.load(DISK_LVL4)
-            img_rect = img.get_rect(topleft=(x, y))
-            inv_sc.blit(img, img_rect)
-            x+=54
-        elif item == 'disk_lvl5':
-            img = pygame.image.load(DISK_LVL5)
-            img_rect = img.get_rect(topleft=(x, y))
-            inv_sc.blit(img, img_rect)
-            x+=54
-        elif item == 'armor_lvl1':
-            img = pygame.image.load(ARMOR_LVL1)
-            img_rect = img.get_rect(topleft=(x, y))
-            inv_sc.blit(img, img_rect)
-            x+=54
-        elif item == 'armor_lvl2':
-            img = pygame.image.load(ARMOR_LVL2)
-            img_rect = img.get_rect(topleft=(x, y))
-            inv_sc.blit(img, img_rect)
-            x+=54
-        elif item == 'armor_lvl3':
-            img = pygame.image.load(ARMOR_LVL3)
-            img_rect = img.get_rect(topleft=(x, y))
-            inv_sc.blit(img, img_rect)
-            x+=54
-        elif item == 'armor_lvl4':
-            img = pygame.image.load(ARMOR_LVL4)
-            img_rect = img.get_rect(topleft=(x, y))
-            inv_sc.blit(img, img_rect)
-            x+=54
-        elif item == 'armor_lvl5':
-            img = pygame.image.load(ARMOR_LVL5)
-            img_rect = img.get_rect(topleft=(x, y))
-            inv_sc.blit(img, img_rect)
-            x+=54
-        if c==2:
-            x=0
-            y+=53
-        c+=1
+            x += 54
 
-def renderInv(sc, player,mode,pos):
-    inv_sc = pygame.Surface((160,105))
-    
+        elif item[:len(item) - 1] == 'armor_lvl':
+            img = pygame.image.load('src/inv/armor_lvl' + str(random.randint(1, 5)) + '.png')
+            img_rect = img.get_rect(topleft=(x, y))
+            inv_sc.blit(img, img_rect)
+            x += 54
+        if c == 2:
+            x = 0
+            y += 53
+        c += 1
+
+
+def renderInv(sc, player, mode, pos):
+    inv_sc = pygame.Surface((160, 105))
+
     if mode:
-        renderOnlyInv(inv_sc,player)
-        surfSelect = pygame.Surface((54,53))
+        renderOnlyInv(inv_sc, player)
+        surfSelect = pygame.Surface((54, 53))
         surfSelect.set_alpha(200)
-        
-        if pos in [0,1,2]:
-            y=0
-            x=54*pos
+
+        if pos in [0, 1, 2]:
+            y = 0
+            x = 54 * pos
         else:
-            y=53
-            x=54*(pos-3)
+            y = 53
+            x = 54 * (pos - 3)
 
         img = pygame.image.load(SELECTOR)
-        img_rect = img.get_rect(topleft=(0,0))
+        img_rect = img.get_rect(topleft=(0, 0))
         surfSelect.blit(img, img_rect)
-        inv_sc.blit(surfSelect,(x,y))
-        
+        inv_sc.blit(surfSelect, (x, y))
+
     else:
-        renderOnlyInv(inv_sc,player)
+        renderOnlyInv(inv_sc, player)
 
-    
-    sc.blit(inv_sc, (800, 32*7))
+    sc.blit(inv_sc, (800, 32 * 7))
 
-def renderInfoAboutPlayer(sc,player):
+
+def renderInfoAboutPlayer(sc, player, lvl, countofmobs):
     info_sc = pygame.Surface((160, 800))
     info_sc.fill((5, 67, 187))
 
     f = pygame.font.Font('src/Minecraftia.ttf', 16)
 
-    text_hp = f.render("HP:  "+str(bin(player.hp))[1:], 0, (250, 162, 2))
-    info_sc.blit(text_hp, (0,0))
+    text_hp = f.render("HP:  " + str(bin(player.hp))[1:], 0, (250, 162, 2))
+    info_sc.blit(text_hp, (0, 0))
 
-    text_power = f.render("POWER:  "+str(bin(player.power+player.weapon_lvl))[1:], 0, (250, 162, 2))
-    info_sc.blit(text_power, (0,32))
+    text_power = f.render("POWER:  " + str(bin(player.power + player.weapon_lvl))[1:], 0, (250, 162, 2))
+    info_sc.blit(text_power, (0, 32))
 
-    text_armor = f.render("ARMOR:  "+str(bin(player.armor_lvl))[1:], 0, (250, 162, 2))
-    info_sc.blit(text_armor, (0,64))
+    text_armor = f.render("ARMOR:  " + str(bin(player.armor_lvl))[1:], 0, (250, 162, 2))
+    info_sc.blit(text_armor, (0, 64))
 
-    
-    if player.weapon_lvl == 0:
+    wp_lvl = player.weapon_lvl
+    if wp_lvl > 5:
+        wp_lvl -= 5
+    if wp_lvl == 0:
         img = pygame.image.load(EMPTY_SLOT)
-        info_sc.blit(img,(16,32*4))
-    elif player.weapon_lvl == 1:
+        info_sc.blit(img, (16, 32 * 4))
+    elif wp_lvl == 1:
         img = pygame.image.load(DISK_LVL1)
-        info_sc.blit(img,(16,32*4))
-    elif player.weapon_lvl == 2:
+        info_sc.blit(img, (16, 32 * 4))
+    elif wp_lvl == 2:
         img = pygame.image.load(DISK_LVL2)
-        info_sc.blit(img,(16,32*4))
-    elif player.weapon_lvl == 3:
+        info_sc.blit(img, (16, 32 * 4))
+    elif wp_lvl == 3:
         img = pygame.image.load(DISK_LVL3)
-        info_sc.blit(img,(16,32*4))
-    elif player.weapon_lvl == 4:
+        info_sc.blit(img, (16, 32 * 4))
+    elif wp_lvl == 4:
         img = pygame.image.load(DISK_LVL4)
-        info_sc.blit(img,(16,32*4))
-    elif player.weapon_lvl == 5:
+        info_sc.blit(img, (16, 32 * 4))
+    elif wp_lvl == 5:
         img = pygame.image.load(DISK_LVL5)
-        info_sc.blit(img,(16,32*4))
+        info_sc.blit(img, (16, 32 * 4))
 
-    if player.armor_lvl == 0:
+    arm_lvl = player.armor_lvl
+    if arm_lvl > 5:
+        arm_lvl -= 5
+    if arm_lvl == 0:
         img = pygame.image.load(EMPTY_SLOT)
-        info_sc.blit(img,(64+32,32*4))
-    elif player.armor_lvl == 1:
+        info_sc.blit(img, (64 + 32, 32 * 4))
+    elif arm_lvl == 1:
         img = pygame.image.load(ARMOR_LVL1)
-        info_sc.blit(img,(64+32,32*4))
-    elif player.armor_lvl == 2:
+        info_sc.blit(img, (64 + 32, 32 * 4))
+    elif arm_lvl == 2:
         img = pygame.image.load(ARMOR_LVL2)
-        info_sc.blit(img,(64+32,32*4))
-    elif player.armor_lvl == 3:
+        info_sc.blit(img, (64 + 32, 32 * 4))
+    elif arm_lvl == 3:
         img = pygame.image.load(ARMOR_LVL3)
-        info_sc.blit(img,(64+32,32*4))
-    elif player.armor_lvl == 4:
+        info_sc.blit(img, (64 + 32, 32 * 4))
+    elif arm_lvl == 4:
         img = pygame.image.load(ARMOR_LVL4)
-        info_sc.blit(img,(64+32,32*4))
-    elif player.armor_lvl == 5:
+        info_sc.blit(img, (64 + 32, 32 * 4))
+    elif arm_lvl == 5:
         img = pygame.image.load(ARMOR_LVL5)
-        info_sc.blit(img,(64+32,32*4))
-    
+        info_sc.blit(img, (64 + 32, 32 * 4))
 
+    text_inv = f.render("INVENTORY: ", 0, (250, 162, 2))
+    info_sc.blit(text_inv, (0, 32 * 6))
 
-    text_inv = f.render("INVENTORY: ",0,(250, 162, 2))
-    info_sc.blit(text_inv, (0,32*6))
+    text_inv = f.render("LVL: " + str(bin(lvl))[1:], 0, (250, 162, 2))
+    info_sc.blit(text_inv, (0, 32 * 12))
 
-    sc.blit(info_sc, (800,0))
+    text_inv = f.render("MOBS: \n" + str(bin(countofmobs))[1:], 0, (250, 162, 2))
+    info_sc.blit(text_inv, (0, 32 * 13))
+
+    sc.blit(info_sc, (800, 0))
     return
 
-def renderGame(sc, sector, god_mode, player):
+
+def renderGame(sc, sector, god_mode, player, lvl, countofmobs, sector_view):
     if god_mode:
         x = 0
         y = 0
         for i in range(0, len(sector)):
             for j in range(0, len(sector[i])):
-                blitImg(sc, sector[i][j], x, y)
+                blitImg(sc, sector[i][j], x, y, sector_view[i][j])
                 x += STEP
             x = 0
             y += STEP
         return
-    x = 0
-    y = 0
+
+    x = player.view_location[0]
+    y = player.view_location[1]
     sc.fill((0, 0, 0))
     for i in range(0, len(sector)):
         for j in range(0, len(sector[i])):
             if sector[i][j] == '2':
-                # print('x=', x, '\ty=', y)
-                renderLightZone(sc, sector, x, y, i, j)
-            # else:
-            #     blitImg(sc, sector[i][j], x, y)
-            x += STEP
-        x = 0
-        y += STEP
-    renderInfoAboutPlayer(sc,player)
+                if player.view_location[0] < 3 * STEP:
+                    player.view_location[0] += STEP
+                elif player.view_location[0] > 22 * STEP:
+                    player.view_location[0] -= STEP
+                elif player.view_location[1] < 3 * STEP:
+                    player.view_location[1] += STEP
+                elif player.view_location[1] > 22 * STEP:
+                    player.view_location[1] -= STEP
+                renderLightZone(sc, sector, player.view_location[0], player.view_location[1], i, j, sector_view)
+
+    renderInfoAboutPlayer(sc, player, lvl, countofmobs)
     renderInv(sc, player, False, -1)
 
 
 def attackMob(sc, location):
-    x = location[1] * STEP
-    y = location[0] * STEP
+    x = location[1]
+    y = location[0]
     img = pygame.image.load(RED)
     img_rect = img.get_rect(topleft=(x, y))
     sc.blit(img, img_rect)
