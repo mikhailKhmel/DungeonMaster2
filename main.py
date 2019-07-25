@@ -8,7 +8,7 @@ import entities
 import genmaps
 import render
 
-VERSION = 'alpha 1.4'
+VERSION = 'alpha 1.4.1'
 
 conn = sqlite3.connect('stats.db')
 cursor = conn.cursor()
@@ -18,17 +18,37 @@ class Game(object):
     level = 1
     sector = genmaps.Map(level=level)
     sector_view = [[]]
-    player = entities.Player(id=0, location=sector.setPlayer(), view_location=[32 * 5, 32 * 5])
+    player = entities.Player(
+        id=0, location=sector.setPlayer(), view_location=[32 * 5, 32 * 5])
     username = ''
     control_mode = 1  # 0 - only keyboard. 1 - keyboard and mouse
+    god_mode = False
+    zero_mobs = False
+
+    clock = pygame.time.Clock()
+    mob_clk = 0
+    move_clk = 0
+    killed_mobs = 0
 
     def __init__(self, level):
+
         self.level = level
-        self.__FPS = 20
-        self.__STEP = 16
+        self.FPS = 20
         self.__WINDOW_HEIGHT = 960
         self.__WINDOW_WEIGHT = 800
         self.sector_view_append()
+        self.god_mode = False
+        self.zero_mobs = False
+        pygame.init()
+        self.sc = pygame.display.set_mode(self.getWindow)
+        self.lightZone = pygame.display.set_mode(self.getWindow)
+        self.sc.blit(self.lightZone, (0, 0))
+        self.menu(False, True)
+        self.renderView()
+        self.mob_clk = 0
+        self.move_clk = 0
+        self.killed_mobs = 0
+        # self.cycle()
 
     def sector_view_append(self):
         self.sector_view = [[]]
@@ -37,7 +57,8 @@ class Game(object):
                 if self.sector.maps[i][j] == '0':
                     self.sector_view[i].append(render.LIGHT_GROUND)
                 elif self.sector.maps[i][j] == '1':
-                    self.sector_view[i].append(random.choice([render.LIGHT_WALL, render.LIGHT_WALL1]))
+                    self.sector_view[i].append(random.choice(
+                        [render.LIGHT_WALL, render.LIGHT_WALL1]))
                 elif self.sector.maps[i][j] == '2':
                     self.sector_view[i].append(render.PLAYER)
                 elif self.sector.maps[i][j] == '3':
@@ -49,19 +70,31 @@ class Game(object):
             self.sector_view.append([])
 
     @property
-    def getFps(self):
-        return self.__FPS
-
-    @property
-    def getStep(self):
-        return self.__STEP
+    def get_fps(self):
+        return self.FPS
 
     @property
     def getWindow(self):
         return self.__WINDOW_HEIGHT, self.__WINDOW_WEIGHT
 
-    def renderView(self, god_mode):
-        render.renderGame(sc, self.sector.maps, god_mode, self.player, self.level, len(self.sector.mobs),
+    def get_view(self):
+        startI = self.player.location[0] - 2
+        endI = startI + 5
+        startJ = self.player.location[1] - 2
+        endJ = startJ + 5
+        view = [['1'] * 5 for i in range(5)]
+        x = 0
+        y = 0
+        for i in range(startI, endI):
+            for j in range(startJ, endJ):
+                view[x][y] = self.sector.maps[i][j]
+                y += 1
+            x += 1
+            y = 0
+        return view
+
+    def renderView(self):
+        render.renderGame(self.sc, self.sector.maps, self.player, self.level, len(self.sector.mobs),
                           self.sector_view)
 
     def initPlayer(self):
@@ -75,7 +108,7 @@ class Game(object):
         self.player.view_location = [32 * 5, 32 * 5]
 
     def restartLevel(self, new_player):
-        sc.fill((0, 0, 0))
+        self.sc.fill((0, 0, 0))
         self.sector.__init__(level=self.level)
         self.sector_view_append()
         if new_player:
@@ -84,8 +117,7 @@ class Game(object):
             self.player.location = self.sector.setPlayer()
 
     def increaseLevel(self):
-        global zero_mobs
-        zero_mobs = False
+        self.zero_mobs = False
         self.level += 1
 
     def movePlayer(self, dx, dy):
@@ -97,15 +129,17 @@ class Game(object):
             return
 
     def moveMobs(self):
-        self.sector.moveMobs(self.player, sc)
+        self.sector.moveMobs(self.player, self.sc)
 
     def __searchMob(self, di, dj):
         tmp = self.sector.mobs
         for i in range(0, len(tmp)):
             if tmp[i].location == [self.player.location[0] + di, self.player.location[1] + dj]:
                 tmp[i].hp = tmp[i].hp - self.player.power
-                render.attackMob(sc, [self.player.view_location[1] + di * 32, self.player.view_location[0] + dj * 32])
+                render.attackMob(
+                    self.sc, [self.player.view_location[1] + di * 32, self.player.view_location[0] + dj * 32], False)
                 if tmp[i].hp <= 0:
+                    self.killed_mobs += 1
                     tmp.remove(tmp[i])
                     self.sector.maps[self.player.location[0] +
                                      di][self.player.location[1] + dj] = '0'
@@ -130,9 +164,10 @@ class Game(object):
         while mode:
             flag = False
             pygame.display.update()
-            clock.tick(self.getFps)
-            render.renderInfoAboutPlayer(sc, self.player, self.level, len(self.sector.mobs))
-            render.renderInv(sc, self.player, mode, pos)
+            self.clock.tick(self.FPS)
+            render.renderInfoAboutPlayer(
+                self.sc, self.player, self.level, len(self.sector.mobs))
+            render.renderInv(self.sc, self.player, mode, pos)
 
             if self.control_mode == 0:
                 for e in pygame.event.get():
@@ -197,24 +232,26 @@ class Game(object):
                     if int(selected_item[len(selected_item) - 1]) <= self.player.weapon_lvl:
                         continue
                     else:
-                        self.player.weapon_lvl = int(selected_item[len(selected_item) - 1])
+                        self.player.weapon_lvl = int(
+                            selected_item[len(selected_item) - 1])
                         self.player.power = 1 + self.player.weapon_lvl
                         self.player.inventory[pos] = ''
                 elif selected_item[:len(selected_item) - 1] == 'armor_lvl':
                     if int(selected_item[len(selected_item) - 1]) <= self.player.armor_lvl:
                         continue
                     else:
-                        self.player.armor_lvl = int(selected_item[len(selected_item) - 1])
+                        self.player.armor_lvl = int(
+                            selected_item[len(selected_item) - 1])
                         self.player.inventory[pos] = ''
 
-    def enter_name(self, sc):
+    def enter_name(self, ):
         size = 16
         name = []
         curr_index = 0
 
         while True:
             pygame.display.update()
-            clock.tick(self.getFps)
+            self.clock.tick(self.FPS)
 
             if len(name) >= 24:
                 continue
@@ -222,12 +259,12 @@ class Game(object):
             f = pygame.font.Font('src/Minecraftia.ttf', size)
 
             t = f.render('Enter your name', 0, (255, 255, 255))
-            sc.blit(t, (0, 0))
+            self.sc.blit(t, (0, 0))
             x = 0
             for i in name:
                 t = f.render(i, 0, (255, 255, 255))
                 x += size
-                sc.blit(t, (x, size * 3))
+                self.sc.blit(t, (x, size * 3))
             pass
 
             for e in pygame.event.get():
@@ -235,7 +272,7 @@ class Game(object):
                     if e.key == pygame.K_BACKSPACE:
                         curr_index -= 1
                         del name[curr_index]
-                        sc.fill((0, 0, 0))
+                        self.sc.fill((0, 0, 0))
                         break
                     elif e.key == pygame.K_a:
                         name += 'a'
@@ -276,7 +313,7 @@ class Game(object):
                     elif e.key == pygame.K_s:
                         name += 's'
                     elif e.key == pygame.K_t:
-                        name += 's'
+                        name += 't'
                     elif e.key == pygame.K_u:
                         name += 'u'
                     elif e.key == pygame.K_v:
@@ -327,25 +364,25 @@ class Game(object):
                         name += '('
                     elif e.key == pygame.K_RIGHTPAREN:
                         name += ')'
-
-
                     elif e.key == pygame.K_RETURN:
-                        sql = "select username from users where username='" + ''.join(name) + "'"
+                        sql = "select username from users where username='" + \
+                              ''.join(name) + "'"
                         if cursor.execute(sql):
                             tmp_username = cursor.fetchone()
                             if tmp_username != None:
                                 self.username = ''.join(name)
                             else:
-                                sql = 'insert into users (username, highest_level) values ("' + ''.join(name) + '", 0)'
+                                sql = 'insert into users (username, highest_level, max_mobs) values ("' + ''.join(
+                                    name) + '", 0, 0)'
                                 cursor.execute(sql)
                                 conn.commit()
                                 self.username = ''.join(name)
-                        sc.fill((0, 0, 0))
+                        self.sc.fill((0, 0, 0))
                         return
-                    # sc.fill((0,0,0))
+                    # self.sc.fill((0,0,0))
                     curr_index += 1
 
-    def renderMenu(self, sc, pos, InProccess):
+    def renderMenu(self, pos, InProccess):
         # sc.fill((0, 0, 0))
         f = pygame.font.Font('src/Minecraftia.ttf', 48)
         if InProccess:
@@ -359,35 +396,38 @@ class Game(object):
                 t = f.render(menu[i], 0, (255, 255, 0))
             else:
                 t = f.render(menu[i], 0, (255, 255, 255))
-            sc.blit(t, (0, y))
+            self.sc.blit(t, (0, y))
             y += 72
         return menu
 
     def show_stats(self):
-        sc.fill((0, 0, 0))
+        self.sc.fill((0, 0, 0))
+        size = 30
         while True:
 
             pygame.display.update()
-            clock.tick(self.getFps)
+            self.clock.tick(self.FPS)
 
             sql = 'select * from users'
             result = cursor.execute(sql)
 
-            f = pygame.font.Font('src/Minecraftia.ttf', 48)
-            t = f.render('username      highest_level', 0, (255, 255, 255))
-            sc.blit(t, (0, 0))
-            t = f.render('==========================', 0, (255, 255, 255))
-            sc.blit(t, (0, 48))
+            f = pygame.font.Font('src/Minecraftia.ttf', size)
+            t = f.render('username      highest_level      Mob_kills', 0, (255, 255, 255))
+            self.sc.blit(t, (0, 0))
+            t = f.render('==========================================', 0, (255, 255, 255))
+            self.sc.blit(t, (0, size))
             c = 2
             for row in result:
                 t = f.render(str(row[0]), 0, (255, 255, 255))
-                sc.blit(t, (0, 48 * c))
+                self.sc.blit(t, (0, size * c))
                 t = f.render(str(row[1]), 0, (255, 255, 255))
-                sc.blit(t, (48 * 10, 48 * c))
+                self.sc.blit(t, (size * 10, size * c))
+                t = f.render(str(row[2]), 0, (255, 255, 255))
+                self.sc.blit(t, (size * 22, size * c))
                 c += 1
             c += 1
             t = f.render('BACK', 0, (255, 255, 0))
-            sc.blit(t, (0, 48 * c))
+            self.sc.blit(t, (0, size * c))
             for e in pygame.event.get():
                 if e.type == pygame.QUIT:
                     quit()
@@ -397,20 +437,20 @@ class Game(object):
                             return
                 else:
                     mouse_pos = pygame.mouse.get_pos()
-                    if e.type == pygame.MOUSEBUTTONDOWN:
-                        if mouse_pos[0] >= 0 and mouse_pos[0] <= 138 and mouse_pos[1] >= 311 and mouse_pos[1] <= 397:
-                            return
+                    if e.type == pygame.MOUSEBUTTONDOWN and 0 <= mouse_pos[0] <= 138 and mouse_pos[
+                        1] >= size*c and mouse_pos[1] <= size*(c+2):
+                        return
 
     def show_settings(self):
         f = pygame.font.Font('src/Minecraftia.ttf', 48)
-        sc.fill((0, 0, 0))
+        self.sc.fill((0, 0, 0))
         curr_pos = 0
         while True:
             pygame.display.update()
-            clock.tick(self.getFps)
+            self.clock.tick(self.FPS)
 
             t = f.render('CONTROL SETTINGS', 0, (255, 255, 255))
-            sc.blit(t, (0, 0))
+            self.sc.blit(t, (0, 0))
             curr_mode = 'KEYBOARD + MOUSE' if self.control_mode else 'ONLY KEYBOARD'
             curr_menu = [['MODE:', curr_mode], 'BACK']
 
@@ -420,19 +460,19 @@ class Game(object):
                         t = f.render(i[0], 0, (255, 255, 0))
                     else:
                         t = f.render(i[0], 0, (255, 255, 255))
-                    sc.blit(t, (0, 48))
+                    self.sc.blit(t, (0, 48))
                     t = f.render(i[1], 0, (255, 255, 255))
-                    sc.blit(t, (300, 48))
+                    self.sc.blit(t, (300, 48))
                 else:
                     if curr_pos == 1:
                         t = f.render(i, 0, (255, 255, 0))
                     else:
                         t = f.render(i, 0, (255, 255, 255))
-                    sc.blit(t, (0, 48 * 3))
+                    self.sc.blit(t, (0, 48 * 3))
 
             if self.control_mode:
                 for event in pygame.event.get():
-                    if e.type == pygame.QUIT:
+                    if event.type == pygame.QUIT:
                         quit()
                     pressed = pygame.mouse.get_pressed()
                     pos = pygame.mouse.get_pos()
@@ -442,12 +482,12 @@ class Game(object):
                         curr_pos = 1
 
                     if pressed[0]:
-                        #print(pos)
+                        # print(pos)
                         if pos[0] <= 150 and pos[0] >= 0 and pos[1] >= 66 and pos[1] <= 107:
                             self.control_mode = 0
-                            sc.fill((0, 0, 0))
+                            self.sc.fill((0, 0, 0))
                         elif pos[0] >= 0 and pos[0] <= 137 and pos[1] >= 163 and pos[1] <= 204:
-                            sc.fill((0, 0, 0))
+                            self.sc.fill((0, 0, 0))
                             return
             else:
                 for e in pygame.event.get():
@@ -456,10 +496,10 @@ class Game(object):
                     if e.type == pygame.KEYDOWN:
                         if e.key == pygame.K_RETURN:
                             if curr_pos == 1:
-                                sc.fill((0, 0, 0))
+                                self.sc.fill((0, 0, 0))
                                 return
                             else:
-                                sc.fill((0, 0, 0))
+                                self.sc.fill((0, 0, 0))
                                 self.control_mode = 1
                         elif e.key == pygame.K_UP:
                             if curr_pos != 0:
@@ -468,18 +508,18 @@ class Game(object):
                             if curr_pos != 1:
                                 curr_pos = 1
 
-    def menu(self, InProccess, sc, firstStart):
+    def menu(self, InProccess, firstStart):
 
         if firstStart:
-            self.enter_name(sc)
+            self.enter_name()
 
         menu = True
         pos = 0
         while menu:
             pygame.display.update()
-            clock.tick(game.getFps)
+            self.clock.tick(self.FPS)
 
-            list_menu = game.renderMenu(sc, pos, InProccess)
+            list_menu = self.renderMenu(pos, InProccess)
             length_menu = len(list_menu)
             for e in pygame.event.get():
                 if e.type == pygame.QUIT:
@@ -509,14 +549,14 @@ class Game(object):
                                 menu = False
                             elif list_menu[pos] == 'stats':
                                 self.show_stats()
-                                sc.fill((0, 0, 0))
+                                self.sc.fill((0, 0, 0))
                             elif list_menu[pos] == 'settings':
                                 self.show_settings()
                             elif list_menu[pos] == 'exit':
                                 quit()
                 else:
                     mouse_pos = pygame.mouse.get_pos()
-                    #print(mouse_pos)
+                    # print(mouse_pos)
 
                     if mouse_pos[0] >= 0 and mouse_pos[0] <= 153 and mouse_pos[1] >= 198 and mouse_pos[1] <= 242:
                         pos = 0
@@ -525,18 +565,16 @@ class Game(object):
                                 if list_menu[pos] == 'start' or list_menu[pos] == 'return':
                                     menu = False
 
-
                     elif mouse_pos[0] >= 0 and mouse_pos[0] <= 151 and mouse_pos[1] >= 271 and mouse_pos[1] <= 314:
                         pos = 1
                         if e.type == pygame.MOUSEBUTTONDOWN:
                             if e.button == 1:
                                 if list_menu[pos] == 'stats':
                                     self.show_stats()
-                                    sc.fill((0, 0, 0))
+                                    self.sc.fill((0, 0, 0))
                                 else:
                                     self.restartLevel(True)
                                     menu = False
-
 
                     elif mouse_pos[0] >= 0 and mouse_pos[0] <= 234 and mouse_pos[1] >= 342 and mouse_pos[1] <= 391:
                         pos = 2
@@ -544,7 +582,6 @@ class Game(object):
                             if e.button == 1:
                                 if list_menu[pos] == 'settings':
                                     self.show_settings()
-
 
                     elif mouse_pos[0] >= 0 and mouse_pos[0] <= 104 and mouse_pos[1] >= 419 and mouse_pos[1] <= 459:
                         pos = 3
@@ -603,7 +640,7 @@ class Game(object):
 
     def check_mouse_pos(self, pos):
         # print(pos)
-        #print(self.player.view_location)
+        # print(self.player.view_location)
         pl = self.player.view_location
         up_sprite = ((self.player.view_location[0], self.player.view_location[1] - 32),
                      (self.player.view_location[0] + 32, self.player.view_location[1] - 1))
@@ -616,16 +653,20 @@ class Game(object):
 
         if pos[0] >= up_sprite[0][0] and pos[0] <= up_sprite[1][0] and pos[1] >= up_sprite[0][1] and pos[1] <= \
                 up_sprite[1][1]:
-            obj = self.sector.maps[self.player.location[0] - 1][self.player.location[1]]
+            obj = self.sector.maps[self.player.location[0] -
+                                   1][self.player.location[1]]
         elif pos[0] >= right_sprite[0][0] and pos[0] <= right_sprite[1][0] and pos[1] >= right_sprite[0][1] and pos[
             1] <= right_sprite[1][1]:
-            obj = self.sector.maps[self.player.location[0]][self.player.location[1] + 1]
+            obj = self.sector.maps[self.player.location[0]
+            ][self.player.location[1] + 1]
         elif pos[0] >= down_sprite[0][0] and pos[0] <= down_sprite[1][0] and pos[1] >= down_sprite[0][1] and pos[1] <= \
                 down_sprite[1][1]:
-            obj = self.sector.maps[self.player.location[0] + 1][self.player.location[1]]
+            obj = self.sector.maps[self.player.location[0] +
+                                   1][self.player.location[1]]
         elif pos[0] >= left_sprite[0][0] and pos[0] <= left_sprite[1][0] and pos[1] >= left_sprite[0][1] and pos[1] <= \
                 left_sprite[1][1]:
-            obj = self.sector.maps[self.player.location[0]][self.player.location[1] - 1]
+            obj = self.sector.maps[self.player.location[0]
+            ][self.player.location[1] - 1]
         else:
             return
         if obj == '3':
@@ -635,181 +676,179 @@ class Game(object):
         # print(up_sprite,right_sprite,down_sprite,left_sprite)
         return
 
-    def printLog(self):
-        print('LVL=', self.level)
-        print('MAP')
-        for i in self.sector.maps:
-            print(i)
-        print('MOBS')
-        for i in self.sector.mobs:
-            print('id=', i.id)
-            print('location=', i.location)
-            print('power=', i.power)
-            print('hp=', i.hp)
-            print('\n')
-        print('ROOMS')
-        for i in self.sector.rooms:
-            print([i.x1, i.x2, i.y1, i.y2])
-        print('CENTERS')
-        print(self.sector.center)
-        print('CHESTS')
-        for i in self.sector.chests:
-            print(i.location)
-        print('\nPLAYER LOG')
-        print(self.player.location)
-        print(self.player.hp)
-        print(self.player.power)
-        print(self.player.armor_lvl)
-        print(self.player.weapon_lvl)
-        print(self.player.inventory)
+    def post_event(self, tpe):
+        #
+        ev = pygame.event.Event(pygame.KEYDOWN, {'key': tpe})
+        pygame.event.post(ev)
 
-
-god_mode = False
-zero_mobs = False
-game = Game(1)
-
-pygame.init()
-sc = pygame.display.set_mode(game.getWindow)
-lightZone = pygame.display.set_mode(game.getWindow)
-sc.blit(lightZone, (0, 0))
-clock = pygame.time.Clock()
-###########
-
-game.menu(False, sc, True)
-game.renderView(god_mode)
-
-###########
-pygame.display.update()
-mob_clk = 0
-move_clk = 0
-while True:
-    fps = game.getFps
-    clock.tick(fps)
-    pygame.display.update()
-    game.renderView(god_mode)
-    move_key = False
-    if game.player.hp <= 0:
-        sql = 'select highest_level from users where username="' + str(game.username) + '"'
-        cursor.execute(sql)
-        result = cursor.fetchone()
-        if int(result[0]) < game.level:
-            sql = 'update users set highest_level=' + str(game.level) + ' where username="' + str(game.username) + '"'
-            cursor.execute(sql)
-            conn.commit()
-
-        sc.fill((255, 0, 0))
-        f = pygame.font.Font('src/Minecraftia.ttf', 48)
-        gameover_text = f.render("GAME OVER", 0, (0, 0, 0))
-        sc.blit(gameover_text, (250, 250))
+    def cycle(self):
+        # while True:
+        self.clock.tick(self.FPS)
         pygame.display.update()
-        time.sleep(2)
-        game.level = 1
-        game.restartLevel(True)
-        game.menu(False, sc, False)
+        self.renderView()
+        # move_key = False
+        if self.player.hp <= 0:
+            if self.god_mode == 1:
+                pass
+            else:
+                sql = 'select highest_level from users where username="' + \
+                      str(self.username) + '"'
+                cursor.execute(sql)
+                result = cursor.fetchone()
+                if int(result[0]) < self.level:
+                    sql = 'update users set highest_level=' + \
+                          str(self.level) + ' where username="' + \
+                          str(self.username) + '"'
+                    cursor.execute(sql)
+                    conn.commit()
 
-    if game.control_mode == 0:
-        keys = pygame.key.get_pressed()
-        delay = 2
-        if keys[pygame.K_UP]:
-            if move_clk == delay:
-                game.movePlayer(-1, 0)
-                move_clk = 0
-            else:
-                move_clk += 1
-        elif keys[pygame.K_DOWN]:
-            if move_clk == delay:
-                game.movePlayer(1, 0)
-                move_clk = 0
-            else:
-                move_clk += 1
-        elif keys[pygame.K_RIGHT]:
-            if move_clk == delay:
-                game.movePlayer(0, 1)
-                move_clk = 0
-            else:
-                move_clk += 1
-        elif keys[pygame.K_LEFT]:
-            if move_clk == delay:
-                game.movePlayer(0, -1)
-                move_clk = 0
-            else:
-                move_clk += 1
+                sql = 'select max_mobs from users where username="' + \
+                      str(self.username) + '"'
+                cursor.execute(sql)
+                result = cursor.fetchone()
+                if int(result[0]) < self.killed_mobs:
+                    sql = 'update users set max_mobs=' + \
+                          str(self.killed_mobs) + ' where username="' + \
+                          str(self.username) + '"'
+                    cursor.execute(sql)
+                    conn.commit()
+                    self.killed_mobs = 0
 
-        for i in pygame.event.get():
-            if i.type == pygame.QUIT:
-                exit()
-            elif i.type == pygame.KEYDOWN:
-                # game.printLog()
-                if i.key == pygame.K_SPACE:
-                    game.playerAttackMob()
-                    move_key = True
-                elif i.key == pygame.K_p:
-                    if not god_mode:
-                        god_mode = True
-                    else:
-                        god_mode = False
-                elif i.key == pygame.K_r:
-                    game.openChest()
-                elif i.key == pygame.K_ESCAPE:
-                    game.menu(True, sc, False)
-                elif i.key == pygame.K_e:
-                    game.inv_mode()
-    else:
-        keys = pygame.key.get_pressed()
-        delay = 2
-        if keys[pygame.K_w]:
-            if move_clk == delay:
-                game.movePlayer(-1, 0)
-                move_clk = 0
-            else:
-                move_clk += 1
-        elif keys[pygame.K_s]:
-            if move_clk == delay:
-                game.movePlayer(1, 0)
-                move_clk = 0
-            else:
-                move_clk += 1
-        elif keys[pygame.K_d]:
-            if move_clk == delay:
-                game.movePlayer(0, 1)
-                move_clk = 0
-            else:
-                move_clk += 1
-        elif keys[pygame.K_a]:
-            if move_clk == delay:
-                game.movePlayer(0, -1)
-                move_clk = 0
-            else:
-                move_clk += 1
+                self.sc.fill((255, 0, 0))
+                f = pygame.font.Font('src/Minecraftia.ttf', 48)
+                gameover_text = f.render("GAME OVER", 0, (0, 0, 0))
+                self.sc.blit(gameover_text, (250, 250))
+                pygame.display.update()
+                time.sleep(2)
+                self.level = 1
+                self.restartLevel(True)
+                self.menu(False, False)
 
-        for i in pygame.event.get():
-            if i.type == pygame.QUIT:
-                exit()
-            elif i.type == pygame.MOUSEBUTTONDOWN:
-                # game.printLog()
-                if i.button == 1:
-                    game.check_mouse_pos(pygame.mouse.get_pos())
-                    # game.playerAttackMob()
-                    # move_key = True
-            elif i.type == pygame.KEYDOWN:
-                if i.key == pygame.K_p:
-                    if not god_mode:
-                        god_mode = True
-                    else:
-                        god_mode = False
-                # elif i.key == pygame.K_r:
-                #     game.openChest()
-                elif i.key == pygame.K_ESCAPE:
-                    game.menu(True, sc, False)
-                elif i.key == pygame.K_e:
-                    game.inv_mode()
+        if self.control_mode == 0:
+            keys = pygame.key.get_pressed()
+            delay = 2
+            if keys[pygame.K_UP]:
+                if self.move_clk == delay:
+                    self.movePlayer(-1, 0)
+                    self.move_clk = 0
+                else:
+                    self.move_clk += 1
+            elif keys[pygame.K_DOWN]:
+                if self.move_clk == delay:
+                    self.movePlayer(1, 0)
+                    self.move_clk = 0
+                else:
+                    self.move_clk += 1
+            elif keys[pygame.K_RIGHT]:
+                if self.move_clk == delay:
+                    self.movePlayer(0, 1)
+                    self.move_clk = 0
+                else:
+                    self.move_clk += 1
+            elif keys[pygame.K_LEFT]:
+                if self.move_clk == delay:
+                    self.movePlayer(0, -1)
+                    self.move_clk = 0
+                else:
+                    self.move_clk += 1
 
-    if mob_clk == int(fps / 3):
-        game.moveMobs()
-        mob_clk = 0
-    else:
-        mob_clk += 1
+            for i in pygame.event.get():
+                if i.type == pygame.QUIT:
+                    exit()
+                elif i.type == pygame.KEYDOWN:
+                    # game.printLog()
+                    if i.key == pygame.K_SPACE:
+                        self.playerAttackMob()
+                        move_key = True
+                    elif i.key == pygame.K_p:
+                        if not self.god_mode:
+                            self.god_mode = True
+                        else:
+                            self.god_mode = False
+                    elif i.key == pygame.K_r:
+                        self.openChest()
+                    elif i.key == pygame.K_ESCAPE:
+                        self.menu(True, False)
+                    elif i.key == pygame.K_e:
+                        self.inv_mode()
+        else:
+            keys = pygame.key.get_pressed()
+            delay = 2
+            if keys[pygame.K_w]:
+                if self.move_clk == delay:
+                    self.movePlayer(-1, 0)
+                    self.move_clk = 0
+                else:
+                    self.move_clk += 1
+            elif keys[pygame.K_s]:
+                if self.move_clk == delay:
+                    self.movePlayer(1, 0)
+                    self.move_clk = 0
+                else:
+                    self.move_clk += 1
+            elif keys[pygame.K_d]:
+                if self.move_clk == delay:
+                    self.movePlayer(0, 1)
+                    self.move_clk = 0
+                else:
+                    self.move_clk += 1
+            elif keys[pygame.K_a]:
+                if self.move_clk == delay:
+                    self.movePlayer(0, -1)
+                    self.move_clk = 0
+                else:
+                    self.move_clk += 1
+            for i in pygame.event.get():
 
-    if len(game.sector.mobs) == 0 and not zero_mobs:
-        game.addToInvFromChest('potion')
-        zero_mobs = True
+                if i.type == pygame.KEYDOWN:
+                    if i.key == pygame.K_p:
+                        if not self.god_mode:
+                            self.god_mode = True
+                        else:
+                            self.god_mode = False
+                    elif i.key == pygame.K_r:
+                        self.openChest()
+                    elif i.key == pygame.K_ESCAPE:
+                        self.menu(True, False)
+                    elif i.key == pygame.K_SPACE:
+                        self.playerAttackMob()
+                    elif i.key == pygame.K_e:
+                        self.inv_mode()
+                elif i.type == pygame.MOUSEBUTTONDOWN:
+                    # game.printLog()
+                    if i.button == 1:
+                        self.check_mouse_pos(pygame.mouse.get_pos())
+
+            # for i in pygame.event.get():
+            #     if i.type == pygame.QUIT:
+            #         exit()
+
+            #             # game.playerAttackMob()
+            #             # move_key = True
+            #     elif i.type == pygame.KEYDOWN:
+            #         if i.key == pygame.K_p:
+            #             if not self.god_mode:
+            #                 self.god_mode = True
+            #             else:
+            #                 self.god_mode = False
+            #         # elif i.key == pygame.K_r:
+            #         #     game.openChest()
+            #         elif i.key == pygame.K_ESCAPE:
+            #             self.menu(True, False)
+            #         elif i.key == pygame.K_e:
+            #             self.inv_mode()
+
+        if self.mob_clk == int(self.FPS / 3):
+            self.moveMobs()
+            self.mob_clk = 0
+        else:
+            self.mob_clk += 1
+
+        if len(self.sector.mobs) == 0 and not self.zero_mobs:
+            self.addToInvFromChest('potion')
+            zero_mobs = True
+
+
+game = Game(1)
+while True:
+    game.cycle()

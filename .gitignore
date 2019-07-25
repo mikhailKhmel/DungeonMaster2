@@ -4,5 +4,7 @@ __pycache__/*
 .vscode/*
 build_windows/*
 build_windows*
-setup*
-stats*
+setup.py
+stats.db
+agent.py
+neural_network.py

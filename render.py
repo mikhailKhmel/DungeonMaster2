@@ -1,5 +1,6 @@
-import pygame
 import random
+
+import pygame
 
 STEP = 32
 WINDOW_HEIGHT = 1024
@@ -287,17 +288,7 @@ def renderInfoAboutPlayer(sc, player, lvl, countofmobs):
     return
 
 
-def renderGame(sc, sector, god_mode, player, lvl, countofmobs, sector_view):
-    if god_mode:
-        x = 0
-        y = 0
-        for i in range(0, len(sector)):
-            for j in range(0, len(sector[i])):
-                blitImg(sc, sector[i][j], x, y, sector_view[i][j])
-                x += STEP
-            x = 0
-            y += STEP
-        return
+def renderGame(sc, sector, player, lvl, countofmobs, sector_view):
 
     x = player.view_location[0]
     y = player.view_location[1]
@@ -307,11 +298,11 @@ def renderGame(sc, sector, god_mode, player, lvl, countofmobs, sector_view):
             if sector[i][j] == '2':
                 if player.view_location[0] < 3 * STEP:
                     player.view_location[0] += STEP
-                elif player.view_location[0] > 22 * STEP:
+                elif player.view_location[0] > 21 * STEP:
                     player.view_location[0] -= STEP
                 elif player.view_location[1] < 3 * STEP:
                     player.view_location[1] += STEP
-                elif player.view_location[1] > 22 * STEP:
+                elif player.view_location[1] > 21 * STEP:
                     player.view_location[1] -= STEP
                 renderLightZone(sc, sector, player.view_location[0], player.view_location[1], i, j, sector_view)
 
@@ -319,9 +310,13 @@ def renderGame(sc, sector, god_mode, player, lvl, countofmobs, sector_view):
     renderInv(sc, player, False, -1)
 
 
-def attackMob(sc, location):
-    x = location[1]
-    y = location[0]
+def attackMob(sc, location, reverse):
+    if reverse:
+        x = location[0]
+        y = location[1]
+    else:
+        x = location[1]
+        y = location[0]
     img = pygame.image.load(RED)
     img_rect = img.get_rect(topleft=(x, y))
     sc.blit(img, img_rect)

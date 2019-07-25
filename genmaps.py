@@ -1,10 +1,11 @@
-import random
 import math
+import random
+
 import entities
 import render
 
 
-class Room():
+class Room(object):
     x1 = 0
     x2 = 0
 
@@ -34,9 +35,9 @@ class Map(object):
         self.mobs = []
         self.rooms = []
 
-        countofrooms = random.randint(10, 15)
+        countofrooms = random.randint(20, 25)
         self.generateroom(countofrooms, True)
-        countofchests = random.randint(5, 10)
+        countofchests = random.randint(10, 15)
         self.setChests(countofchests, 1)
         self.setLadder()
         countofmobs = random.randint(countofrooms, countofrooms + 5)
@@ -114,7 +115,7 @@ class Map(object):
                 if flag:
                     continue
                 else:
-                    self.chests.append(entities.Chest(i, x, y))
+                    self.chests.append(entities.Chest(c, x, y))
                     self.maps[x][y] = '5'
                     c += 1
             else:
@@ -181,51 +182,67 @@ class Map(object):
                 cur_j] == '2' or self.maps[cur_i][cur_j - 1] == '2':
                 minus_hp = mob.power - player.armor_lvl
                 player.hp -= abs(minus_hp)
-                render.attackMob(sc, player.view_location)
+                render.attackMob(sc, player.view_location, True)
             else:
-                diffI = player.location[0] - cur_i
-                diffJ = player.location[1] - cur_j
-                di = []
-                dj = []
-                if diffI < 0 and diffJ < 0:  # в зависимости от разницы составляются "векторы" направления моба
-                    di = [-1, -2]
-                    dj = [-0, -0]
-                elif diffI > 0 and diffJ < 0:
-                    di = [0, 0]
-                    dj = [-1, -2]
-                elif diffI < 0 and diffJ > 0:
-                    di = [-1, -2]
-                    dj = [0, 0]
-                elif diffI > 0 and diffJ > 0:
-                    di = [0, 0]
-                    dj = [1, 2]
-                elif diffI == 0 and diffJ <= 0:
-                    di = [0, 0]
-                    dj = [-1, -0]
-                elif diffI == 0 and diffJ >= 0:
-                    di = [0, 0]
-                    dj = [1, 0]
-                elif diffI <= 0 and diffJ == 0:
-                    di = [-1, -0]
-                    dj = [0, 0]
-                elif diffI >= 0 and diffJ == 0:
-                    di = [1, 2]
-                    dj = [0, 0]
-                else:
-                    pass
+                diffI = cur_i - player.location[0]
+                diffJ = cur_j - player.location[1]
+                di = 0
+                dj = 0
+                if diffI > 0 and diffJ == 0:  # север
+                    di = -1
+                    dj = 0
+                elif diffI < 0 and diffJ == 0:  # юг
+                    di = 1
+                    dj = 0
+                elif diffI == 0 and diffJ > 0:  # запад
+                    di = 0
+                    dj = -1
+                elif diffI == 0 and diffJ < 0:  # восток
+                    di = 0
+                    dj = 1
+                elif diffI < 0 and diffJ > 0:  # северо-восток
+                    di = random.randint(0, 1)
+                    if di == 0:
+                        dj = -1
+                    else:
+                        dj = 0
+                elif diffI > 0 and diffJ > 0:  # юго-восток
+                    di = random.randint(-1, 0)
+                    if di == -1:
+                        dj = 0
+                    else:
+                        dj = 1
+                elif diffI > 0 and diffJ < 0:  # юго-запад
+                    di = random.randint(-1, 0)
+                    if di == -1:
+                        dj = 0
+                    else:
+                        dj = 1
+                elif diffI < 0 and diffJ < 0:  # северо-запад
+                    di = random.randint(0, 1)
+                    if di == 0:
+                        dj = -1
+                    else:
+                        dj = 0
 
                 flag = False
                 newI = 0
                 newJ = 0
-                for i in di:
-                    for j in dj:
-                        if self.maps[cur_i + i][cur_j + j] == '0':
-                            flag = True
-                            newI = i
-                            newJ = j
-                            break
-                    if flag:
-                        break
+                if self.maps[cur_i + di][cur_j + dj] == '0':
+                    newI = di
+                    newJ = dj
+                    flag = True
+                else:
+                    newI = -di
+                    newJ = -dj
+                    if self.maps[cur_i + newI][cur_j + newJ] == '0':
+                        flag = True
+                    else:
+                        newI = di
+                        newJ = dj
+                        newI, newJ = newJ, newI
+                        flag = True
+
                 if flag:
                     mob.location[0] = cur_i + newI
                     mob.location[1] = cur_j + newJ
