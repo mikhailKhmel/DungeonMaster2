@@ -1,5 +1,6 @@
-import pygame
 import random
+
+import pygame
 
 STEP = 32
 WINDOW_HEIGHT = 1024
@@ -189,7 +190,7 @@ def renderOnlyInv(inv_sc, player):
         c += 1
 
 
-def renderInv(sc, player, mode, pos):
+def renderInv(sc, player, mode, pos, inv_mode):
     inv_sc = pygame.Surface((160, 105))
 
     if mode:
@@ -213,6 +214,7 @@ def renderInv(sc, player, mode, pos):
         renderOnlyInv(inv_sc, player)
 
     sc.blit(inv_sc, (800, 32 * 7))
+    # renderInfoAboutControl(sc, inv_mode)
 
 
 def renderInfoAboutPlayer(sc, player, lvl, countofmobs):
@@ -283,8 +285,30 @@ def renderInfoAboutPlayer(sc, player, lvl, countofmobs):
     text_inv = f.render("MOBS: \n" + str(bin(countofmobs))[1:], 0, (250, 162, 2))
     info_sc.blit(text_inv, (0, 32 * 13))
 
+    text_F1 = f.render("F1 HELP", 0, (250, 162, 2))
+    info_sc.blit(text_F1, (0, 32 * 14))
+
     sc.blit(info_sc, (800, 0))
     return
+
+
+def renderInfoAboutControl(sc):
+    # 800 474
+    info = pygame.Surface((200, 800))
+
+    font = pygame.font.Font('src/Minecraftia.ttf', 12)
+    text_list = ["IN INVENTORY:",
+                 '====================',
+                 "E close Inventory", "Q or RMB remove Item", "SPACE or LMB use Item", 'IN GAME:',
+                 '====================',
+                 "WASD movement", "SPACE attack", "R open chest", "E open Inventory", "Esc open Menu"]
+
+    i = 1
+    for text in text_list:
+        text = font.render(text, 0, (250, 162, 2))
+        info.blit(text, (0, i * 12))
+        i += 1
+    sc.blit(info, (200, 200))
 
 
 def renderGame(sc, sector, god_mode, player, lvl, countofmobs, sector_view):
@@ -299,8 +323,6 @@ def renderGame(sc, sector, god_mode, player, lvl, countofmobs, sector_view):
             y += STEP
         return
 
-    x = player.view_location[0]
-    y = player.view_location[1]
     sc.fill((0, 0, 0))
     for i in range(0, len(sector)):
         for j in range(0, len(sector[i])):
@@ -316,7 +338,8 @@ def renderGame(sc, sector, god_mode, player, lvl, countofmobs, sector_view):
                 renderLightZone(sc, sector, player.view_location[0], player.view_location[1], i, j, sector_view)
 
     renderInfoAboutPlayer(sc, player, lvl, countofmobs)
-    renderInv(sc, player, False, -1)
+    renderInv(sc, player, False, -1, False)
+    # renderInfoAboutControl(sc, False)
 
 
 def attackMob(sc, location):

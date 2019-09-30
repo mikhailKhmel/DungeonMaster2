@@ -8,7 +8,7 @@ import entities
 import genmaps
 import render
 
-VERSION = 'alpha 1.4'
+VERSION = 'alpha 1.4.1'
 
 conn = sqlite3.connect('stats.db')
 cursor = conn.cursor()
@@ -132,7 +132,7 @@ class Game(object):
             pygame.display.update()
             clock.tick(self.getFps)
             render.renderInfoAboutPlayer(sc, self.player, self.level, len(self.sector.mobs))
-            render.renderInv(sc, self.player, mode, pos)
+            render.renderInv(sc, self.player, mode, pos, True)
 
             if self.control_mode == 0:
                 for e in pygame.event.get():
@@ -349,10 +349,10 @@ class Game(object):
         # sc.fill((0, 0, 0))
         f = pygame.font.Font('src/Minecraftia.ttf', 48)
         if InProccess:
-            menu = ['return', 'restart', 'settings', 'exit']
+            menu = ['return', 'restart', 'exit']  # removed 'settings'
             y = 180
         else:
-            menu = ['start', 'stats', 'settings', 'exit']
+            menu = ['start', 'stats', 'exit']
             y = 180
         for i in range(0, len(menu)):
             if i == pos:
@@ -391,82 +391,81 @@ class Game(object):
             for e in pygame.event.get():
                 if e.type == pygame.QUIT:
                     quit()
-                if self.control_mode == 0:
-                    if e.type == pygame.KEYDOWN:
-                        if e.key == pygame.K_RETURN:
-                            return
+                if e.type == pygame.KEYDOWN:
+                    if e.key == pygame.K_RETURN:
+                        return
                 else:
                     mouse_pos = pygame.mouse.get_pos()
                     if e.type == pygame.MOUSEBUTTONDOWN:
-                        if mouse_pos[0] >= 0 and mouse_pos[0] <= 138 and mouse_pos[1] >= 311 and mouse_pos[1] <= 397:
+                        if 0 <= mouse_pos[0] <= 138 and mouse_pos[1] >= 48 * c and mouse_pos[1] <= 48 * (c + 1):
                             return
 
-    def show_settings(self):
-        f = pygame.font.Font('src/Minecraftia.ttf', 48)
-        sc.fill((0, 0, 0))
-        curr_pos = 0
-        while True:
-            pygame.display.update()
-            clock.tick(self.getFps)
-
-            t = f.render('CONTROL SETTINGS', 0, (255, 255, 255))
-            sc.blit(t, (0, 0))
-            curr_mode = 'KEYBOARD + MOUSE' if self.control_mode else 'ONLY KEYBOARD'
-            curr_menu = [['MODE:', curr_mode], 'BACK']
-
-            for i in curr_menu:
-                if isinstance(i, list):
-                    if curr_pos == 0:
-                        t = f.render(i[0], 0, (255, 255, 0))
-                    else:
-                        t = f.render(i[0], 0, (255, 255, 255))
-                    sc.blit(t, (0, 48))
-                    t = f.render(i[1], 0, (255, 255, 255))
-                    sc.blit(t, (300, 48))
-                else:
-                    if curr_pos == 1:
-                        t = f.render(i, 0, (255, 255, 0))
-                    else:
-                        t = f.render(i, 0, (255, 255, 255))
-                    sc.blit(t, (0, 48 * 3))
-
-            if self.control_mode:
-                for event in pygame.event.get():
-                    if e.type == pygame.QUIT:
-                        quit()
-                    pressed = pygame.mouse.get_pressed()
-                    pos = pygame.mouse.get_pos()
-                    if pos[0] <= 150 and pos[0] >= 0 and pos[1] >= 66 and pos[1] <= 107:
-                        curr_pos = 0
-                    elif pos[0] >= 0 and pos[0] <= 137 and pos[1] >= 163 and pos[1] <= 204:
-                        curr_pos = 1
-
-                    if pressed[0]:
-                        #print(pos)
-                        if pos[0] <= 150 and pos[0] >= 0 and pos[1] >= 66 and pos[1] <= 107:
-                            self.control_mode = 0
-                            sc.fill((0, 0, 0))
-                        elif pos[0] >= 0 and pos[0] <= 137 and pos[1] >= 163 and pos[1] <= 204:
-                            sc.fill((0, 0, 0))
-                            return
-            else:
-                for e in pygame.event.get():
-                    if e.type == pygame.QUIT:
-                        quit()
-                    if e.type == pygame.KEYDOWN:
-                        if e.key == pygame.K_RETURN:
-                            if curr_pos == 1:
-                                sc.fill((0, 0, 0))
-                                return
-                            else:
-                                sc.fill((0, 0, 0))
-                                self.control_mode = 1
-                        elif e.key == pygame.K_UP:
-                            if curr_pos != 0:
-                                curr_pos = 0
-                        elif e.key == pygame.K_DOWN:
-                            if curr_pos != 1:
-                                curr_pos = 1
+    # def show_settings(self):
+    #     f = pygame.font.Font('src/Minecraftia.ttf', 48)
+    #     sc.fill((0, 0, 0))
+    #     curr_pos = 0
+    #     while True:
+    #         pygame.display.update()
+    #         clock.tick(self.getFps)
+    #
+    #         t = f.render('CONTROL SETTINGS', 0, (255, 255, 255))
+    #         sc.blit(t, (0, 0))
+    #         curr_mode = 'KEYBOARD + MOUSE' if self.control_mode else 'ONLY KEYBOARD'
+    #         curr_menu = [['MODE:', curr_mode], 'BACK']
+    #
+    #         for i in curr_menu:
+    #             if isinstance(i, list):
+    #                 if curr_pos == 0:
+    #                     t = f.render(i[0], 0, (255, 255, 0))
+    #                 else:
+    #                     t = f.render(i[0], 0, (255, 255, 255))
+    #                 sc.blit(t, (0, 48))
+    #                 t = f.render(i[1], 0, (255, 255, 255))
+    #                 sc.blit(t, (300, 48))
+    #             else:
+    #                 if curr_pos == 1:
+    #                     t = f.render(i, 0, (255, 255, 0))
+    #                 else:
+    #                     t = f.render(i, 0, (255, 255, 255))
+    #                 sc.blit(t, (0, 48 * 3))
+    #
+    #         if self.control_mode:
+    #             for event in pygame.event.get():
+    #                 if event.type == pygame.QUIT:
+    #                     quit()
+    #                 pressed = pygame.mouse.get_pressed()
+    #                 pos = pygame.mouse.get_pos()
+    #                 if 150 >= pos[0] >= 0 and 66 <= pos[1] <= 107:
+    #                     curr_pos = 0
+    #                 elif 0 <= pos[0] <= 137 and 163 <= pos[1] <= 204:
+    #                     curr_pos = 1
+    #
+    #                 if pressed[0]:
+    #                     # print(pos)
+    #                     if 0 <= pos[0] <= 150 <= pos[1] <= 107:
+    #                         self.control_mode = 0
+    #                         sc.fill((0, 0, 0))
+    #                     elif 0 <= pos[0] <= 137 and 163 <= pos[1] <= 204:
+    #                         sc.fill((0, 0, 0))
+    #                         return
+    #         else:
+    #             for e in pygame.event.get():
+    #                 if e.type == pygame.QUIT:
+    #                     quit()
+    #                 if e.type == pygame.KEYDOWN:
+    #                     if e.key == pygame.K_RETURN:
+    #                         if curr_pos == 1:
+    #                             sc.fill((0, 0, 0))
+    #                             return
+    #                         else:
+    #                             sc.fill((0, 0, 0))
+    #                             self.control_mode = 1
+    #                     elif e.key == pygame.K_UP:
+    #                         if curr_pos != 0:
+    #                             curr_pos = 0
+    #                     elif e.key == pygame.K_DOWN:
+    #                         if curr_pos != 1:
+    #                             curr_pos = 1
 
     def menu(self, InProccess, sc, firstStart):
 
@@ -484,39 +483,39 @@ class Game(object):
             for e in pygame.event.get():
                 if e.type == pygame.QUIT:
                     exit()
-                if self.control_mode == 0:
-                    if e.type == pygame.KEYDOWN:
-                        if e.key == pygame.K_DOWN:
-                            if pos + 1 > length_menu - 1:
-                                pass
-                            else:
-                                pos += 1
-                        elif e.key == pygame.K_UP:
-                            if pos - 1 < 0:
-                                pass
-                            else:
-                                pos -= 1
-                        elif e.key == pygame.K_ESCAPE:
-                            if list_menu[0] == 'start':
-                                quit()
-                            else:
-                                menu = False
-                        elif e.key == pygame.K_RETURN:
-                            if list_menu[pos] == 'start' or list_menu[pos] == 'return':
-                                menu = False
-                            elif list_menu[pos] == 'restart':
-                                self.restartLevel(True)
-                                menu = False
-                            elif list_menu[pos] == 'stats':
-                                self.show_stats()
-                                sc.fill((0, 0, 0))
-                            elif list_menu[pos] == 'settings':
-                                self.show_settings()
-                            elif list_menu[pos] == 'exit':
-                                quit()
+
+                if e.type == pygame.KEYDOWN:
+                    if e.key == pygame.K_DOWN:
+                        if pos + 1 > length_menu - 1:
+                            pass
+                        else:
+                            pos += 1
+                    elif e.key == pygame.K_UP:
+                        if pos - 1 < 0:
+                            pass
+                        else:
+                            pos -= 1
+                    elif e.key == pygame.K_ESCAPE:
+                        if list_menu[0] == 'start':
+                            quit()
+                        else:
+                            menu = False
+                    elif e.key == pygame.K_RETURN:
+                        if list_menu[pos] == 'start' or list_menu[pos] == 'return':
+                            menu = False
+                        elif list_menu[pos] == 'restart':
+                            self.restartLevel(True)
+                            menu = False
+                        elif list_menu[pos] == 'stats':
+                            self.show_stats()
+                            sc.fill((0, 0, 0))
+                        # elif list_menu[pos] == 'settings':
+                        #     self.show_settings()
+                        elif list_menu[pos] == 'exit':
+                            quit()
                 else:
                     mouse_pos = pygame.mouse.get_pos()
-                    #print(mouse_pos)
+                    # print(mouse_pos)
 
                     if mouse_pos[0] >= 0 and mouse_pos[0] <= 153 and mouse_pos[1] >= 198 and mouse_pos[1] <= 242:
                         pos = 0
@@ -538,16 +537,15 @@ class Game(object):
                                     menu = False
 
 
-                    elif mouse_pos[0] >= 0 and mouse_pos[0] <= 234 and mouse_pos[1] >= 342 and mouse_pos[1] <= 391:
+                    # elif mouse_pos[0] >= 0 and mouse_pos[0] <= 234 and mouse_pos[1] >= 342 and mouse_pos[1] <= 391:
+                    #     pos = 2
+                    #     if e.type == pygame.MOUSEBUTTONDOWN:
+                    #         if e.button == 1:
+                    #             if list_menu[pos] == 'settings':
+                    #                 self.show_settings()
+
+                    elif mouse_pos[0] >= 0 and mouse_pos[0] <= 104 and mouse_pos[1] >= 342 and mouse_pos[1] <= 391:
                         pos = 2
-                        if e.type == pygame.MOUSEBUTTONDOWN:
-                            if e.button == 1:
-                                if list_menu[pos] == 'settings':
-                                    self.show_settings()
-
-
-                    elif mouse_pos[0] >= 0 and mouse_pos[0] <= 104 and mouse_pos[1] >= 419 and mouse_pos[1] <= 459:
-                        pos = 3
                         if e.type == pygame.MOUSEBUTTONDOWN:
                             if e.button == 1:
                                 if list_menu[pos] == 'exit':
@@ -603,7 +601,7 @@ class Game(object):
 
     def check_mouse_pos(self, pos):
         # print(pos)
-        #print(self.player.view_location)
+        # print(self.player.view_location)
         pl = self.player.view_location
         up_sprite = ((self.player.view_location[0], self.player.view_location[1] - 32),
                      (self.player.view_location[0] + 32, self.player.view_location[1] - 1))
@@ -663,6 +661,19 @@ class Game(object):
         print(self.player.weapon_lvl)
         print(self.player.inventory)
 
+    def reference(self):
+        flag = True
+        while flag:
+            render.renderInfoAboutControl(sc)
+            pygame.display.update()
+            clock.tick(self.getFps)
+            for e in pygame.event.get():
+                if e.type == pygame.QUIT:
+                    exit()
+                elif e.type == pygame.KEYDOWN:
+                    if e.key in [pygame.K_ESCAPE, pygame.K_F1]:
+                        flag = False
+
 
 god_mode = False
 zero_mobs = False
@@ -707,102 +718,74 @@ while True:
         game.restartLevel(True)
         game.menu(False, sc, False)
 
-    if game.control_mode == 0:
-        keys = pygame.key.get_pressed()
-        delay = 2
-        if keys[pygame.K_UP]:
-            if move_clk == delay:
-                game.movePlayer(-1, 0)
-                move_clk = 0
-            else:
-                move_clk += 1
-        elif keys[pygame.K_DOWN]:
-            if move_clk == delay:
-                game.movePlayer(1, 0)
-                move_clk = 0
-            else:
-                move_clk += 1
-        elif keys[pygame.K_RIGHT]:
-            if move_clk == delay:
-                game.movePlayer(0, 1)
-                move_clk = 0
-            else:
-                move_clk += 1
-        elif keys[pygame.K_LEFT]:
-            if move_clk == delay:
-                game.movePlayer(0, -1)
-                move_clk = 0
-            else:
-                move_clk += 1
+    keys = pygame.key.get_pressed()
+    delay = 2
+    if keys[pygame.K_UP] or keys[pygame.K_w]:
+        if move_clk == delay:
+            game.movePlayer(-1, 0)
+            move_clk = 0
+        else:
+            move_clk += 1
+    elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
+        if move_clk == delay:
+            game.movePlayer(1, 0)
+            move_clk = 0
+        else:
+            move_clk += 1
+    elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+        if move_clk == delay:
+            game.movePlayer(0, 1)
+            move_clk = 0
+        else:
+            move_clk += 1
+    elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
+        if move_clk == delay:
+            game.movePlayer(0, -1)
+            move_clk = 0
+        else:
+            move_clk += 1
 
-        for i in pygame.event.get():
-            if i.type == pygame.QUIT:
-                exit()
-            elif i.type == pygame.KEYDOWN:
-                # game.printLog()
-                if i.key == pygame.K_SPACE:
-                    game.playerAttackMob()
-                    move_key = True
-                elif i.key == pygame.K_p:
-                    if not god_mode:
-                        god_mode = True
-                    else:
-                        god_mode = False
-                elif i.key == pygame.K_r:
-                    game.openChest()
-                elif i.key == pygame.K_ESCAPE:
-                    game.menu(True, sc, False)
-                elif i.key == pygame.K_e:
-                    game.inv_mode()
-    else:
-        keys = pygame.key.get_pressed()
-        delay = 2
-        if keys[pygame.K_w]:
-            if move_clk == delay:
-                game.movePlayer(-1, 0)
-                move_clk = 0
-            else:
-                move_clk += 1
-        elif keys[pygame.K_s]:
-            if move_clk == delay:
-                game.movePlayer(1, 0)
-                move_clk = 0
-            else:
-                move_clk += 1
-        elif keys[pygame.K_d]:
-            if move_clk == delay:
-                game.movePlayer(0, 1)
-                move_clk = 0
-            else:
-                move_clk += 1
-        elif keys[pygame.K_a]:
-            if move_clk == delay:
-                game.movePlayer(0, -1)
-                move_clk = 0
-            else:
-                move_clk += 1
+    for i in pygame.event.get():
+        if i.type == pygame.QUIT:
+            exit()
+        elif i.type == pygame.KEYDOWN:
+            # game.printLog()
+            if i.key == pygame.K_SPACE:
+                game.playerAttackMob()
+                move_key = True
+            elif i.key == pygame.K_p:
+                if not god_mode:
+                    god_mode = True
+                else:
+                    god_mode = False
+            elif i.key == pygame.K_r:
+                game.openChest()
+            elif i.key == pygame.K_ESCAPE:
+                game.menu(True, sc, False)
+            elif i.key == pygame.K_e:
+                game.inv_mode()
+            elif i.key == pygame.K_F1:
+                game.reference()
 
-        for i in pygame.event.get():
-            if i.type == pygame.QUIT:
-                exit()
-            elif i.type == pygame.MOUSEBUTTONDOWN:
-                # game.printLog()
-                if i.button == 1:
-                    game.check_mouse_pos(pygame.mouse.get_pos())
-                    # game.playerAttackMob()
-                    # move_key = True
-            elif i.type == pygame.KEYDOWN:
-                if i.key == pygame.K_p:
-                    if not god_mode:
-                        god_mode = True
-                    else:
-                        god_mode = False
-                # elif i.key == pygame.K_r:
-                #     game.openChest()
-                elif i.key == pygame.K_ESCAPE:
-                    game.menu(True, sc, False)
-                elif i.key == pygame.K_e:
-                    game.inv_mode()
+
+        elif i.type == pygame.MOUSEBUTTONDOWN:
+            # game.printLog()
+            if i.button == 1:
+                game.check_mouse_pos(pygame.mouse.get_pos())
+                # game.playerAttackMob()
+                # move_key = True
+        elif i.type == pygame.KEYDOWN:
+            if i.key == pygame.K_p:
+                if not god_mode:
+                    god_mode = True
+                else:
+                    god_mode = False
+            # elif i.key == pygame.K_r:
+            #     game.openChest()
+            elif i.key == pygame.K_ESCAPE:
+                game.menu(True, sc, False)
+            elif i.key == pygame.K_e:
+                game.inv_mode()
 
     if mob_clk == int(fps / 3):
         game.moveMobs()
