@@ -789,7 +789,7 @@ while True:
         if i.type == pygame.QUIT:
             exit()
         elif i.type == pygame.KEYDOWN:
-            game.printLog()
+            # game.printLog()
             if i.key == pygame.K_SPACE:
                 game.playerAttackMob()
                 move_key = True
