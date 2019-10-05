@@ -18,7 +18,7 @@ class Game(object):
     level = 1
     sector = genmaps.Map(level=level)
     sector_view = [[]]
-    player = entities.Player(id=0, location=sector.setPlayer(), view_location=[32 * 5, 32 * 5])
+    player = entities.Player(id=0, location=sector.setPlayer(), view_location=[32 * 10, 32 * 10])
     username = ''
     control_mode = 1  # 0 - only keyboard. 1 - keyboard and mouse
 
@@ -60,9 +60,9 @@ class Game(object):
     def getWindow(self):
         return self.__WINDOW_HEIGHT, self.__WINDOW_WEIGHT
 
-    def renderView(self, god_mode):
+    def renderView(self, god_mode, seconds):
         render.renderGame(sc, self.sector.maps, god_mode, self.player, self.level, len(self.sector.mobs),
-                          self.sector_view)
+                          self.sector_view, seconds)
 
     def initPlayer(self):
         self.player.hp = 10
@@ -100,28 +100,52 @@ class Game(object):
         self.sector.moveMobs(self.player, sc)
 
     def __searchMob(self, di, dj):
-        tmp = self.sector.mobs
-        for i in range(0, len(tmp)):
-            if tmp[i].location == [self.player.location[0] + di, self.player.location[1] + dj]:
-                tmp[i].hp = tmp[i].hp - self.player.power
-                render.attackMob(sc, [self.player.view_location[1] + di * 32, self.player.view_location[0] + dj * 32])
-                if tmp[i].hp <= 0:
-                    tmp.remove(tmp[i])
-                    self.sector.maps[self.player.location[0] +
-                                     di][self.player.location[1] + dj] = '0'
-                self.sector.mobs = tmp
-                return
+        if self.sector.maps[self.player.location[0] + di][self.player.location[1] + dj] == '3':
+            tmp = self.sector.mobs
+            for i in range(0, len(tmp)):
+                if tmp[i].location == [self.player.location[0] + di, self.player.location[1] + dj]:
+                    tmp[i].hp = tmp[i].hp - self.player.power
+                    render.attackMob(sc,
+                                     [self.player.view_location[1] + di * 32, self.player.view_location[0] + dj * 32],
+                                     False)
+                    if tmp[i].hp <= 0:
+                        tmp.remove(tmp[i])
+                        self.sector.maps[self.player.location[0] +
+                                         di][self.player.location[1] + dj] = '0'
+                    self.sector.mobs = tmp
+                    return
+        elif self.sector.maps[self.player.location[0] + di][self.player.location[1] + dj] == '6':
+            tmp = self.sector.boss
+            for i in range(0, len(tmp)):
+                if tmp[i].location == [self.player.location[0] + di, self.player.location[1] + dj]:
+                    tmp[i].hp = tmp[i].hp - self.player.power
+                    render.attackMob(sc,
+                                     [self.player.view_location[1] + di * 32, self.player.view_location[0] + dj * 32],
+                                     False)
+                    if tmp[i].hp <= 0:
+                        tmp.remove(tmp[i])
+                        self.sector.maps[self.player.location[0] +
+                                         di][self.player.location[1] + dj] = '0'
+                        for item in ['potion', 'glasses']:
+                            self.addToInvFromChest(item)
+                    self.sector.boss = tmp
+                    return
+
 
     def playerAttackMob(self):
         current_locationI = self.player.location[0]
         current_locationJ = self.player.location[1]
-        if self.sector.maps[current_locationI + 1][current_locationJ] == '3':
+        if self.sector.maps[current_locationI + 1][current_locationJ] == '3' or self.sector.maps[current_locationI + 1][
+            current_locationJ] == '6':
             self.__searchMob(1, 0)
-        elif self.sector.maps[current_locationI][current_locationJ + 1] == '3':
+        elif self.sector.maps[current_locationI][current_locationJ + 1] == '3' or self.sector.maps[current_locationI][
+            current_locationJ + 1] == '6':
             self.__searchMob(0, 1)
-        elif self.sector.maps[current_locationI - 1][current_locationJ] == '3':
+        elif self.sector.maps[current_locationI - 1][current_locationJ] == '3' or \
+                self.sector.maps[current_locationI - 1][current_locationJ] == '6':
             self.__searchMob(-1, 0)
-        elif self.sector.maps[current_locationI][current_locationJ - 1] == '3':
+        elif self.sector.maps[current_locationI][current_locationJ - 1] == '3' or self.sector.maps[current_locationI][
+            current_locationJ - 1] == '6':
             self.__searchMob(0, -1)
 
     def inv_mode(self):
@@ -131,7 +155,7 @@ class Game(object):
             flag = False
             pygame.display.update()
             clock.tick(self.getFps)
-            render.renderInfoAboutPlayer(sc, self.player, self.level, len(self.sector.mobs))
+            render.renderInfoAboutPlayer(sc, self.player, self.level, len(self.sector.mobs), 11)
             render.renderInv(sc, self.player, mode, pos, True)
 
             if self.control_mode == 0:
@@ -206,6 +230,13 @@ class Game(object):
                     else:
                         self.player.armor_lvl = int(selected_item[len(selected_item) - 1])
                         self.player.inventory[pos] = ''
+                elif selected_item == 'glasses':
+                    self.player.inventory[pos] = ''
+                    self.using_glasses()
+
+    def using_glasses(self):
+        global god_mode
+        god_mode = True
 
     def enter_name(self, sc):
         size = 16
@@ -660,6 +691,7 @@ class Game(object):
         print(self.player.armor_lvl)
         print(self.player.weapon_lvl)
         print(self.player.inventory)
+        print(self.sector.boss)
 
     def reference(self):
         flag = True
@@ -687,17 +719,25 @@ clock = pygame.time.Clock()
 ###########
 
 game.menu(False, sc, True)
-game.renderView(god_mode)
+game.renderView(god_mode, 0)
 
 ###########
 pygame.display.update()
 mob_clk = 0
 move_clk = 0
+god_mode_clk = 0
+sec = 0
 while True:
     fps = game.getFps
     clock.tick(fps)
     pygame.display.update()
-    game.renderView(god_mode)
+    if god_mode:
+        if god_mode_clk != fps * 10:
+            god_mode_clk += 1
+        else:
+            god_mode_clk = 0
+            god_mode = False
+    game.renderView(god_mode, 11 - god_mode_clk // fps)
     move_key = False
     if game.player.hp <= 0:
         sql = 'select highest_level from users where username="' + str(game.username) + '"'
@@ -749,7 +789,7 @@ while True:
         if i.type == pygame.QUIT:
             exit()
         elif i.type == pygame.KEYDOWN:
-            # game.printLog()
+            game.printLog()
             if i.key == pygame.K_SPACE:
                 game.playerAttackMob()
                 move_key = True

@@ -28,6 +28,16 @@ class Mob(Entity):
         self.location = [x, y]
 
 
+class Boss(Entity):
+    hp = 0
+    power = 0
+
+    def __init__(self, id, level, x, y):
+        super().__init__(id=id)
+        self.hp = level + 5
+        self.power = level + 2
+        self.location = [x, y]
+
 class Player(Entity):
     armor_lvl = 0
     weapon_lvl = 0

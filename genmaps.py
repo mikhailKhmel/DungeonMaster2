@@ -1,5 +1,6 @@
-import random
 import math
+import random
+
 import entities
 import render
 
@@ -25,6 +26,7 @@ class Map(object):
     rooms = []
     chests = []
     mobs = []
+    boss = []
 
     def __init__(self, level):
         self.maps = [['1' for i in range(0, self.length)] for j in range(0, self.length)]
@@ -33,7 +35,7 @@ class Map(object):
         self.chests = []
         self.mobs = []
         self.rooms = []
-
+        self.boss = []
         countofrooms = random.randint(10, 15)
         self.generateroom(countofrooms, True)
         countofchests = random.randint(5, 10)
@@ -41,6 +43,20 @@ class Map(object):
         self.setLadder()
         countofmobs = random.randint(countofrooms, countofrooms + 5)
         self.setMobs(countofmobs, level)
+        self.setBoss(level)
+
+    def setBoss(self, level):
+        for i in range(2):
+            x = random.randint(0, self.length - 1)
+            y = random.randint(0, self.length - 1)
+            while True:
+                if self.maps[x][y] == '0':
+                    self.boss.append(entities.Boss(id=i, level=level, x=x, y=y))
+                    self.maps[x][y] = '6'
+                    break
+                else:
+                    x = random.randint(0, self.length - 1)
+                    y = random.randint(0, self.length - 1)
 
     def cleanUp(self):
         self.maps = [['1' for i in range(0, self.length)] for j in range(0, self.length)]
@@ -48,6 +64,7 @@ class Map(object):
         self.chests = []
         self.mobs = []
         self.rooms = []
+        self.boss = []
 
     def generatetunnels(self, n):
         firstcenter = self.center[n - 1]
@@ -149,7 +166,7 @@ class Map(object):
                 self.maps[x][y] = '3'
                 i += 1
 
-    def moveCurrentMob(self, mob, player, sc):
+    def moveCurrentMob(self, mob, player, sc, boss):
         cur_i = mob.location[0]
         cur_j = mob.location[1]
         find_player = False
@@ -168,20 +185,23 @@ class Map(object):
                     if di != 0 and dj != 0:
                         continue
                     else:
-                        if self.maps[cur_i + di][cur_j + dj] in ['1', '2', '3', '4', '5']:
+                        if self.maps[cur_i + di][cur_j + dj] in ['1', '2', '3', '4', '5', '6']:
                             continue
                         else:
                             break
                 self.maps[cur_i][cur_j] = '0'
                 mob.location[0] += di
                 mob.location[1] += dj
-                self.maps[cur_i + di][cur_j + dj] = '3'
+                if boss:
+                    self.maps[cur_i + di][cur_j + dj] = '6'
+                else:
+                    self.maps[cur_i + di][cur_j + dj] = '3'
         else:
             if self.maps[cur_i + 1][cur_j] == '2' or self.maps[cur_i][cur_j + 1] == '2' or self.maps[cur_i - 1][
                 cur_j] == '2' or self.maps[cur_i][cur_j - 1] == '2':
                 minus_hp = mob.power - player.armor_lvl
                 player.hp -= abs(minus_hp)
-                render.attackMob(sc, player.view_location)
+                render.attackMob(sc, player.view_location, True)
             else:
                 diffI = player.location[0] - cur_i
                 diffJ = player.location[1] - cur_j
@@ -230,11 +250,16 @@ class Map(object):
                     mob.location[0] = cur_i + newI
                     mob.location[1] = cur_j + newJ
                     self.maps[cur_i][cur_j] = '0'
-                    self.maps[cur_i + newI][cur_j + newJ] = '3'
+                    if boss:
+                        self.maps[cur_i + newI][cur_j + newJ] = '6'
+                    else:
+                        self.maps[cur_i + newI][cur_j + newJ] = '3'
 
     def moveMobs(self, player, sc):
         for mob in self.mobs:
-            self.moveCurrentMob(mob, player, sc)
+            self.moveCurrentMob(mob, player, sc, False)
+        for mob in self.boss:
+            self.moveCurrentMob(mob, player, sc, True)
 
     def setPlayer(self):
         while True:
@@ -246,7 +271,7 @@ class Map(object):
 
     def movePlayer(self, dx, dy, player):
         future_place = self.maps[player.location[0] + dx][player.location[1] + dy]
-        if future_place in ['1', '3', '5']:
+        if future_place in ['1', '3', '5', '6']:
             return player.location
         elif future_place == '4':
             return [0, 0]

@@ -29,11 +29,12 @@ LIGHT_GROUND = 'src/env/light/new_plitka.bmp'
 DARK_WALL = 'src/env/dark/wall.bmp'
 DARK_GROUND = 'src/env/dark/plitka1.bmp'
 
-PLAYER = 'src/player/player00.bmp'
-MOB = 'src/env/light/mob1.bmp'
+PLAYER = 'src/player/player.bmp'
+MOB = 'src/env/light/mob.bmp'
 RED = 'src/env/light/redMob.bmp'
 LADDER = 'src/env/light/ladder.bmp'
 CHEST = 'src/env/light/chest.bmp'
+BOSS = 'src/env/light/boss.bmp'
 
 INV_BACK = 'src/inv/new_inv.png'
 EMPTY_SLOT = 'src/inv/slot.png'
@@ -52,7 +53,7 @@ DISK_LVL4 = 'src/inv/disk_lvl4.png'
 DISK_LVL5 = 'src/inv/disk_lvl5.png'
 
 POTION = 'src/inv/potion.png'
-
+GLASSES = 'src/inv/glasses.png'
 
 def blitImg(sc, tpe, dx, dy, tpe_view):
     if tpe == '0':
@@ -77,6 +78,10 @@ def blitImg(sc, tpe, dx, dy, tpe_view):
         sc.blit(img, img_rect)
     elif tpe == '5':
         img = pygame.image.load(CHEST)
+        img_rect = img.get_rect(topleft=(dx, dy))
+        sc.blit(img, img_rect)
+    elif tpe == '6':
+        img = pygame.image.load(BOSS)
         img_rect = img.get_rect(topleft=(dx, dy))
         sc.blit(img, img_rect)
 
@@ -173,6 +178,11 @@ def renderOnlyInv(inv_sc, player):
             img_rect = img.get_rect(topleft=(x, y))
             inv_sc.blit(img, img_rect)
             x += 54
+        elif item == 'glasses':
+            img = pygame.image.load(GLASSES)
+            img_rect = img.get_rect(topleft=(x, y))
+            inv_sc.blit(img, img_rect)
+            x += 54
         elif item[:len(item) - 1] == 'disk_lvl':
             img = pygame.image.load('src/inv/disk_lvl' + str(random.randint(1, 5)) + '.png')
             img_rect = img.get_rect(topleft=(x, y))
@@ -217,7 +227,7 @@ def renderInv(sc, player, mode, pos, inv_mode):
     # renderInfoAboutControl(sc, inv_mode)
 
 
-def renderInfoAboutPlayer(sc, player, lvl, countofmobs):
+def renderInfoAboutPlayer(sc, player, lvl, countofmobs, seconds):
     info_sc = pygame.Surface((160, 800))
     info_sc.fill((5, 67, 187))
 
@@ -287,7 +297,9 @@ def renderInfoAboutPlayer(sc, player, lvl, countofmobs):
 
     text_F1 = f.render("F1 HELP", 0, (250, 162, 2))
     info_sc.blit(text_F1, (0, 32 * 14))
-
+    if seconds < 11:
+        text_buff_seconds = f.render("GLASSES: " + str(seconds) + " SEC", 0, (250, 162, 2))
+        info_sc.blit(text_buff_seconds, (0, 32 * 16))
     sc.blit(info_sc, (800, 0))
     return
 
@@ -311,40 +323,67 @@ def renderInfoAboutControl(sc):
     sc.blit(info, (200, 200))
 
 
-def renderGame(sc, sector, god_mode, player, lvl, countofmobs, sector_view):
+def renderGame(sc, sector, god_mode, player, lvl, countofmobs, sector_view, seconds):
+    sc.fill((0, 0, 0))
     if god_mode:
-        x = 0
-        y = 0
         for i in range(0, len(sector)):
             for j in range(0, len(sector[i])):
+                if sector[i][j] == '2':
+                    if player.view_location[0] < 3 * STEP:
+                        player.view_location[0] += STEP
+                    elif player.view_location[0] > 21 * STEP:
+                        player.view_location[0] -= STEP
+                    elif player.view_location[1] < 3 * STEP:
+                        player.view_location[1] += STEP
+                    elif player.view_location[1] > 21 * STEP:
+                        player.view_location[1] -= STEP
+
+        startI = player.location[0] - 10
+        if startI < 0:
+            startI = 0
+        startJ = player.location[1] - 10
+        if startJ < 0:
+            startJ = 0
+        endI = player.location[0] + 13
+        if endI > 50:
+            endI = 50
+        endJ = player.location[1] + 13
+        if endJ > 50:
+            endJ = 50
+        x = 0
+        y = 0
+        for i in range(startI, endI):
+            for j in range(startJ, endJ):
                 blitImg(sc, sector[i][j], x, y, sector_view[i][j])
                 x += STEP
             x = 0
             y += STEP
-        return
+    else:
+        for i in range(0, len(sector)):
+            for j in range(0, len(sector[i])):
+                if sector[i][j] == '2':
+                    if player.view_location[0] < 3 * STEP:
+                        player.view_location[0] += STEP
+                    elif player.view_location[0] > 22 * STEP:
+                        player.view_location[0] -= STEP
+                    elif player.view_location[1] < 3 * STEP:
+                        player.view_location[1] += STEP
+                    elif player.view_location[1] > 22 * STEP:
+                        player.view_location[1] -= STEP
+                    renderLightZone(sc, sector, player.view_location[0], player.view_location[1], i, j, sector_view)
 
-    sc.fill((0, 0, 0))
-    for i in range(0, len(sector)):
-        for j in range(0, len(sector[i])):
-            if sector[i][j] == '2':
-                if player.view_location[0] < 3 * STEP:
-                    player.view_location[0] += STEP
-                elif player.view_location[0] > 22 * STEP:
-                    player.view_location[0] -= STEP
-                elif player.view_location[1] < 3 * STEP:
-                    player.view_location[1] += STEP
-                elif player.view_location[1] > 22 * STEP:
-                    player.view_location[1] -= STEP
-                renderLightZone(sc, sector, player.view_location[0], player.view_location[1], i, j, sector_view)
-
-    renderInfoAboutPlayer(sc, player, lvl, countofmobs)
+    renderInfoAboutPlayer(sc, player, lvl, countofmobs, seconds)
     renderInv(sc, player, False, -1, False)
     # renderInfoAboutControl(sc, False)
 
 
-def attackMob(sc, location):
-    x = location[1]
-    y = location[0]
+def attackMob(sc, location, reverse):
+    if reverse:
+        x = location[0]
+        y = location[1]
+    else:
+        x = location[1]
+        y = location[0]
     img = pygame.image.load(RED)
     img_rect = img.get_rect(topleft=(x, y))
     sc.blit(img, img_rect)
